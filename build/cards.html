@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MindMatch — Card Sort</title>
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        color: #1a1f36;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        width: 210mm;
+        height: 297mm;
+        overflow: hidden;
+      }
+      .sheet {
+        width: 210mm;
+        height: 297mm;
+        padding: 5mm;
+        display: grid;
+        grid-template-columns: 100mm 100mm;
+        grid-template-rows: 71.75mm 71.75mm 71.75mm 71.75mm;
+        gap: 0;
+        justify-content: center;
+      }
+      .card {
+        width: 100mm;
+        height: 71.75mm;
+        border: 1px dashed #888;
+        padding: 2.8mm 3.2mm 2.5mm 3.2mm;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        overflow: hidden;
+      }
+      .card .header {
+        text-align: center;
+        border-bottom: 1px solid #f9b234;
+        padding-bottom: 0.8mm;
+        margin-bottom: 1.4mm;
+      }
+      .card .brand {
+        font-size: 5.5pt;
+        color: #2f80ed;
+        font-weight: 700;
+        letter-spacing: 0.6pt;
+        line-height: 1;
+      }
+      .card .title {
+        font-size: 7.5pt;
+        color: #1a1f36;
+        font-weight: 700;
+        line-height: 1.15;
+        margin-top: 0.4mm;
+      }
+      .card .instr {
+        font-size: 5.3pt;
+        color: #666;
+        font-style: italic;
+        margin-top: 0.3mm;
+        line-height: 1.2;
+      }
+      .card ul.dims {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+      }
+      .card ul.dims li {
+        display: flex;
+        align-items: center;
+        gap: 1.3mm;
+        font-size: 6.2pt;
+        line-height: 1.05;
+        color: #1a1f36;
+      }
+      .card ul.dims li .box {
+        flex: 0 0 5.5mm;
+        height: 3.4mm;
+        border: 1px solid #2f80ed;
+        border-radius: 0.5mm;
+        background: #fff;
+      }
+      .card ul.dims li .label {
+        flex: 1;
+        font-weight: 500;
+      }
+      .card .footer {
+        margin-top: 1mm;
+        padding-top: 0.8mm;
+        border-top: 1px dotted #ccc;
+        display: flex;
+        align-items: center;
+        gap: 1.5mm;
+        font-size: 5.5pt;
+        color: #888;
+      }
+      .card .footer .lbl {
+        font-weight: 700;
+        color: #2f80ed;
+        letter-spacing: 0.3pt;
+      }
+      .card .footer .line {
+        flex: 1;
+        border-bottom: 1px solid #888;
+        height: 3.5mm;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sheet" id="sheet"></div>
+
+    <script>
+      const dims = [
+        "Therapy approach (CBT, psychodynamic, …)",
+        "Goal alignment (works on what I want)",
+        "How they guide me (directive vs. open)",
+        "Empathy & warmth",
+        "Genuine & authentic",
+        "Positive regard / non-judgemental",
+        "Speaks my language",
+        "Cultural background fit",
+        "Religion / spirituality fit",
+        "Gender preference",
+        "Coping style fit",
+        "Stage of readiness for change",
+      ];
+
+      function cardHTML() {
+        const items = dims
+          .map(
+            (d) =>
+              '<li><span class="box"></span><span class="label">' +
+              d +
+              "</span></li>",
+          )
+          .join("");
+        return (
+          "" +
+          '<div class="card">' +
+          '<div class="header">' +
+          '<div class="brand">MINDMATCH</div>' +
+          '<div class="title">What would YOU match a therapist on?</div>' +
+          '<div class="instr">Rank 1 (most important) → 12 (least). Box on left of each.</div>' +
+          "</div>" +
+          '<ul class="dims">' +
+          items +
+          "</ul>" +
+          '<div class="footer">' +
+          '<span class="lbl">INITIALS</span>' +
+          '<span class="line"></span>' +
+          "</div>" +
+          "</div>"
+        );
+      }
+
+      const sheet = document.getElementById("sheet");
+      for (let i = 0; i < 8; i++)
+        sheet.insertAdjacentHTML("beforeend", cardHTML());
+    </script>
+  </body>
+</html>

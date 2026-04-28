@@ -1,0 +1,4005 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="MindMatch" />
+    <meta name="theme-color" content="#0a0a0f" />
+    <link rel="manifest" href="manifest.json" />
+    <title>MindMatch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        /* Skilline-inspired palette: deep indigo primary + warm amber accent on a soft off-white */
+        --p: #2f80ed; /* primary blue */
+        --pl: #6aa9f5; /* lighter blue */
+        --pd: #1d5fc4; /* deeper blue */
+        --acc: #f9b234; /* warm amber/yellow accent */
+        --bg: #fff8ee; /* Skilline cream background */
+        --surface: #ffffff; /* card surface */
+        --surface2: #eef2f9; /* secondary surface */
+        --card: #ffffff;
+        --card-solid: #ffffff;
+        --t: #0d2240; /* deep navy text */
+        --tl: #4a5b75; /* secondary text */
+        --tlr: #8694ad; /* tertiary text */
+        --b: rgba(13, 34, 64, 0.08);
+        --b2: rgba(13, 34, 64, 0.14);
+        --ok: #10b981;
+        --err: #ef4444;
+        --r: 18px;
+        --rs: 14px;
+        --sh:
+          0 8px 28px rgba(47, 128, 237, 0.1), 0 2px 6px rgba(13, 34, 64, 0.04);
+        --glow: rgba(47, 128, 237, 0.15);
+        --glow2: rgba(249, 178, 52, 0.18);
+        --st: env(safe-area-inset-top, 0px);
+        --sb: env(safe-area-inset-bottom, 0px);
+      }
+      body {
+        font-family:
+          "Poppins",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background: var(--bg);
+        color: var(--t);
+        -webkit-font-smoothing: antialiased;
+        overscroll-behavior: none;
+        min-height: 100dvh;
+      }
+      .bg-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .screen,
+      .tab-bar,
+      .sheet,
+      .sheet-overlay {
+        position: relative;
+        z-index: 1;
+      }
+      .glass-section {
+        background: #ffffff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: 1px solid var(--b);
+        border-radius: 24px;
+        margin: 12px 16px;
+        padding: 20px;
+        box-shadow: var(--sh);
+      }
+
+      /* SCREENS */
+      .screen {
+        display: none;
+        min-height: 100dvh;
+        padding-bottom: calc(80px + var(--sb));
+      }
+      .screen.active {
+        display: block;
+      }
+      .screen.no-tabs {
+        padding-bottom: 0;
+      }
+      .screen > .section,
+      .screen > .home-header,
+      .screen > .header,
+      .screen > .header-back,
+      .screen > .profile-hero,
+      .screen > .user-profile-header,
+      .screen > .menu-list,
+      .screen > .chat-container .header-back {
+        background: #ffffff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: 1px solid var(--b);
+        border-radius: 24px;
+        margin: 12px 16px;
+        box-shadow: var(--sh);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(100%);
+        }
+        to {
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideDown {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(100%);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+      @keyframes typing {
+        0%,
+        60% {
+          opacity: 1;
+        }
+        30% {
+          opacity: 0.3;
+        }
+      }
+
+      /* TAB BAR */
+      .tab-bar {
+        position: fixed;
+        bottom: 12px;
+        left: 16px;
+        right: 16px;
+        background: #ffffff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: 1px solid var(--b);
+        border-radius: 20px;
+        display: flex;
+        padding: 8px 0 calc(8px + var(--sb));
+        z-index: 100;
+        box-shadow: 0 -4px 20px rgba(13, 34, 64, 0.06);
+      }
+      .tab-bar.hidden {
+        display: none;
+      }
+      .tab {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 4px;
+        border: none;
+        background: none;
+        color: var(--tlr);
+        font-size: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .tab.active {
+        color: var(--p);
+      }
+      .tab svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      /* COMMON */
+      .header {
+        padding: calc(var(--st) + 16px) 20px 16px;
+        background: #ffffff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: 1px solid var(--b);
+        border-radius: 24px;
+        margin: 12px 16px;
+        box-shadow: var(--sh);
+      }
+      .header-back {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: calc(var(--st) + 12px) 20px 12px;
+        background: #ffffff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: 1px solid var(--b);
+        border-radius: 24px;
+        margin: 12px 16px;
+        box-shadow: var(--sh);
+      }
+      .back-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: var(--surface2);
+        color: var(--t);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 28px;
+        border-radius: var(--r);
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        width: 100%;
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #1a1a2e;
+        box-shadow: 0 8px 22px rgba(245, 158, 11, 0.38);
+      }
+      .btn-outline {
+        background: transparent;
+        color: var(--pd);
+        border: 2px solid rgba(47, 128, 237, 0.3);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--pd);
+      }
+      .btn-small {
+        padding: 10px 20px;
+        font-size: 14px;
+        width: auto;
+      }
+      .btn-white {
+        background: #fff;
+        color: var(--pd);
+      }
+      .btn-outline-white {
+        background: #ffffff;
+        color: var(--pd);
+        border: 2px solid rgba(47, 128, 237, 0.3);
+      }
+
+      .card {
+        background: #ffffff;
+        border-radius: var(--r);
+        padding: 16px;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .card:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(13, 34, 64, 0.1);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .badge-primary {
+        background: var(--glow);
+        color: var(--pl);
+        border: 1px solid rgba(139, 92, 246, 0.25);
+      }
+      .badge-accent {
+        background: rgba(245, 158, 11, 0.12);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+      }
+      .badge-success {
+        background: rgba(16, 185, 129, 0.12);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+      }
+
+      .avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--pl), var(--p));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+      .avatar-lg {
+        width: 100px;
+        height: 100px;
+        font-size: 36px;
+      }
+      .stars {
+        color: var(--acc);
+        font-size: 14px;
+        letter-spacing: 1px;
+      }
+
+      .input {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: var(--rs);
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        font-size: 16px;
+        font-family: inherit;
+        background: #ffffff;
+        color: var(--t);
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .input:focus {
+        outline: none;
+        border-color: var(--p);
+        box-shadow: 0 0 0 3px var(--glow);
+      }
+      .input::placeholder {
+        color: var(--tlr);
+      }
+
+      .chip-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        background: #ffffff;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--t);
+        cursor: pointer;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .chip.selected {
+        border-color: var(--p);
+        background: var(--glow);
+        color: var(--pl);
+      }
+      .divider {
+        height: 1px;
+        background: var(--b);
+        margin: 16px 0;
+      }
+      .section {
+        padding: 20px;
+        background: #ffffff;
+        backdrop-filter: blur(3px) saturate(120%);
+        -webkit-backdrop-filter: blur(3px) saturate(120%);
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        border-radius: 24px;
+        margin: 12px 16px;
+      }
+      .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .section-title a {
+        font-size: 14px;
+        color: var(--pl);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      /* PIXEL LOGO SVG (inline reusable) */
+      .mm-logo {
+        display: inline-block;
+      }
+      .mm-logo svg {
+        display: block;
+      }
+
+      /* ONBOARDING */
+      #onboarding {
+        background: transparent;
+        color: var(--t);
+        padding: calc(var(--st) + 32px) 24px calc(32px + var(--sb));
+        position: relative;
+        overflow: hidden;
+      }
+      #onboarding::before {
+        content: "";
+        position: absolute;
+        top: -100px;
+        left: -50px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(
+          circle,
+          rgba(139, 92, 246, 0.1) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      #onboarding::after {
+        content: "";
+        position: absolute;
+        bottom: -50px;
+        right: -50px;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(
+          circle,
+          rgba(99, 102, 241, 0.15) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .onb-inner {
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100dvh - 64px);
+      }
+      .onb-hero {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 16px;
+      }
+      .onb-hero h1 {
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      .onb-hero p {
+        font-size: 18px;
+        opacity: 0.85;
+        line-height: 1.5;
+        max-width: 300px;
+      }
+      .onb-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .onb-sub {
+        font-size: 14px;
+        opacity: 0.7;
+        text-align: center;
+        margin-top: 8px;
+      }
+
+      /* SIGNUP SHEET (slides up) */
+      .sheet-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 200;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .sheet-overlay.open {
+        display: block;
+        opacity: 1;
+      }
+      .sheet {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(17, 17, 24, 0.95);
+        backdrop-filter: blur(12px) saturate(120%);
+        -webkit-backdrop-filter: blur(12px) saturate(120%);
+        border-radius: 24px 24px 0 0;
+        padding: 24px 24px calc(24px + var(--sb));
+        z-index: 201;
+        transform: translateY(100%);
+        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        max-height: 90dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        border-bottom: none;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+      }
+      .sheet.open {
+        transform: translateY(0);
+      }
+      .sheet-handle {
+        width: 40px;
+        height: 4px;
+        background: rgba(13, 34, 64, 0.15);
+        border-radius: 4px;
+        margin: 0 auto 20px;
+      }
+      .sheet h2 {
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
+      }
+      .sheet .sub {
+        color: var(--tl);
+        text-align: center;
+        margin-top: 4px;
+        font-size: 14px;
+      }
+      .sheet-form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 20px;
+      }
+      .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 14px;
+        border-radius: var(--r);
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        background: #ffffff;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--t);
+        cursor: pointer;
+        width: 100%;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .social-btn:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+        background: #f6f8fc;
+      }
+      .social-btn:active {
+        background: rgba(13, 34, 64, 0.08);
+      }
+      .or-divider {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        color: var(--tlr);
+        font-size: 14px;
+      }
+      .or-divider::before,
+      .or-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--b);
+      }
+
+      /* HOME */
+      .home-header {
+        padding: calc(var(--st) + 16px) 20px 20px;
+        background: #ffffff;
+        backdrop-filter: blur(3px) saturate(120%);
+        -webkit-backdrop-filter: blur(3px) saturate(120%);
+        color: #fff;
+        border-radius: 24px;
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        margin: 12px 16px;
+        position: relative;
+      }
+      .home-header .greeting {
+        font-size: 14px;
+        opacity: 0.6;
+      }
+      .home-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 4px 0 16px;
+      }
+      .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--rs);
+        color: var(--tlr);
+        font-size: 15px;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+      .search-bar:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+      }
+      .search-bar svg {
+        width: 20px;
+        height: 20px;
+        opacity: 0.7;
+      }
+
+      .quick-filters {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 4px 0;
+      }
+      .quick-filters::-webkit-scrollbar {
+        display: none;
+      }
+      .quick-filter {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        min-width: 72px;
+        padding: 12px 8px;
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--rs);
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .quick-filter:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+      }
+      .quick-filter .icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--pl);
+      }
+      .quick-filter .label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--tl);
+        white-space: nowrap;
+      }
+
+      .match-banner {
+        background: linear-gradient(
+          135deg,
+          rgba(47, 128, 237, 0.12),
+          rgba(249, 178, 52, 0.18)
+        );
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--r);
+        padding: 20px;
+        color: var(--t);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        box-shadow:
+          0 4px 24px rgba(13, 34, 64, 0.08),
+          inset 0 1px 0 #ffffff;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .match-banner:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(13, 34, 64, 0.1);
+      }
+      .match-banner:active {
+        opacity: 0.95;
+      }
+      .match-banner .m-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .match-banner h3 {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .match-banner p {
+        font-size: 13px;
+        opacity: 0.85;
+        margin-top: 2px;
+      }
+      .match-banner .price {
+        margin-left: auto;
+        background: rgba(13, 34, 64, 0.1);
+        border: 1px solid rgba(13, 34, 64, 0.15);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      /* PRACTITIONER CARD */
+      .prac-card {
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--r);
+        padding: 16px;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+        display: flex;
+        gap: 14px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          transform 0.2s,
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .prac-card:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(13, 34, 64, 0.1);
+      }
+      .prac-card:active {
+        transform: scale(0.98);
+        border-color: rgba(13, 34, 64, 0.2);
+      }
+      .prac-card + .prac-card {
+        margin-top: 12px;
+      }
+      .prac-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .prac-name {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .prac-specialty {
+        font-size: 13px;
+        color: var(--tl);
+        margin-top: 2px;
+      }
+      .prac-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--tl);
+      }
+      .prac-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .prac-price {
+        font-weight: 700;
+        color: var(--pl);
+      }
+      .prac-tags {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      .prac-tag {
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: #f6f8fc;
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--tl);
+      }
+
+      /* FEATURED SCROLL */
+      .featured-scroll {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 4px 0;
+      }
+      .featured-scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .featured-card {
+        min-width: 260px;
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--r);
+        overflow: hidden;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .featured-card:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(13, 34, 64, 0.1);
+      }
+      .featured-card:active {
+        transform: scale(0.98);
+      }
+      .fc-header {
+        height: 80px;
+        background: linear-gradient(
+          135deg,
+          rgba(139, 92, 246, 0.3),
+          rgba(99, 102, 241, 0.2)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fc-header .avatar {
+        border: 3px solid #fff;
+      }
+      .fc-body {
+        padding: 14px;
+        text-align: center;
+      }
+      .fc-body h4 {
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .fc-body p {
+        font-size: 12px;
+        color: var(--tl);
+        margin-top: 2px;
+      }
+      .fc-body .stars {
+        margin-top: 6px;
+      }
+
+      /* PROFILE */
+      .profile-hero {
+        background: #ffffff;
+        backdrop-filter: blur(3px) saturate(120%);
+        -webkit-backdrop-filter: blur(3px) saturate(120%);
+        padding: calc(var(--st) + 16px) 20px 32px;
+        text-align: center;
+        color: var(--t);
+        position: relative;
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        border-radius: 24px;
+        margin: 12px 16px;
+      }
+      .profile-hero .back-btn {
+        position: absolute;
+        left: 16px;
+        top: calc(var(--st) + 12px);
+        background: rgba(13, 34, 64, 0.1);
+        color: var(--t);
+      }
+      .profile-hero .avatar {
+        margin: 16px auto 12px;
+        border: 4px solid rgba(139, 92, 246, 0.3);
+      }
+      .profile-hero h1 {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .profile-hero .subtitle {
+        opacity: 0.85;
+        font-size: 14px;
+        margin-top: 4px;
+      }
+      .profile-stats {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        margin-top: 16px;
+      }
+      .stat {
+        text-align: center;
+      }
+      .stat .num {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .stat .lbl {
+        font-size: 11px;
+        opacity: 0.7;
+      }
+      .profile-section {
+        padding: 20px;
+      }
+      .profile-section h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .profile-section p {
+        font-size: 14px;
+        color: var(--tl);
+        line-height: 1.6;
+      }
+      .approach-list {
+        list-style: none;
+      }
+      .approach-list li {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(13, 34, 64, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: var(--tl);
+      }
+      .approach-list li:last-child {
+        border: none;
+      }
+      .approach-list .ai {
+        font-size: 20px;
+      }
+      .profile-bottom {
+        position: fixed;
+        bottom: 12px;
+        left: 16px;
+        right: 16px;
+        padding: 16px 20px calc(16px + var(--sb));
+        background: #ffffff;
+        backdrop-filter: blur(12px) saturate(120%);
+        -webkit-backdrop-filter: blur(12px) saturate(120%);
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        border-radius: 20px;
+        display: flex;
+        gap: 12px;
+      }
+      .price-info {
+        text-align: left;
+      }
+      .price-info .from {
+        font-size: 12px;
+        color: var(--tl);
+      }
+      .price-info .amount {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--t);
+      }
+      .price-info .per {
+        font-size: 12px;
+        color: var(--tl);
+      }
+      .profile-bottom .btn {
+        flex: 1;
+      }
+
+      /* PACKAGES */
+      .package-card {
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--r);
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+      }
+      .package-card + .package-card {
+        margin-top: 12px;
+      }
+      .package-card.selected {
+        border-color: var(--p);
+        box-shadow:
+          0 0 40px var(--glow),
+          inset 0 1px 0 rgba(13, 34, 64, 0.08);
+      }
+      .package-card.popular {
+        position: relative;
+      }
+      .package-card.popular::before {
+        content: "Most Popular";
+        position: absolute;
+        top: -10px;
+        right: 16px;
+        background: var(--acc);
+        color: #1a1a2e;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 10px;
+      }
+      .package-card h4 {
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .pkg-sessions {
+        font-size: 14px;
+        color: var(--tl);
+        margin-top: 2px;
+      }
+      .pkg-price {
+        font-size: 24px;
+        font-weight: 800;
+        margin-top: 8px;
+      }
+      .pkg-price .per {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--tl);
+      }
+      .pkg-features {
+        margin-top: 12px;
+      }
+      .pkg-features li {
+        font-size: 13px;
+        color: var(--tl);
+        padding: 3px 0;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .pkg-features li::before {
+        content: "✓";
+        color: var(--ok);
+        font-weight: 700;
+      }
+
+      .pkg-features li.disabled {
+        color: var(--tlr);
+      }
+
+      /* AI CHAT */
+      .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+      }
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .msg {
+        max-width: 85%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        font-size: 15px;
+        line-height: 1.5;
+        animation: fadeIn 0.3s ease;
+      }
+      .msg-bot {
+        align-self: flex-start;
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-bottom-left-radius: 6px;
+        color: var(--t);
+      }
+      .msg-user {
+        align-self: flex-end;
+        background: linear-gradient(135deg, var(--p), var(--pd));
+        color: #fff;
+        border-bottom-right-radius: 6px;
+      }
+      .msg-typing {
+        align-self: flex-start;
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-bottom-left-radius: 6px;
+        padding: 12px 20px;
+      }
+      .typing-dots {
+        display: flex;
+        gap: 4px;
+      }
+      .typing-dots span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--tlr);
+        animation: typing 1.4s infinite;
+      }
+      .typing-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .typing-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      .chat-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .chat-option {
+        padding: 12px 16px;
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--rs);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--t);
+        cursor: pointer;
+        text-align: left;
+        -webkit-tap-highlight-color: transparent;
+        transition: all 0.2s;
+      }
+      .chat-option:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+        background: #f6f8fc;
+      }
+      .chat-option:active {
+        border-color: var(--p);
+        background: var(--glow);
+      }
+      .chat-input-bar {
+        padding: 12px 20px calc(12px + var(--sb));
+        background: #ffffff;
+        backdrop-filter: blur(3px) saturate(120%);
+        -webkit-backdrop-filter: blur(3px) saturate(120%);
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        border-radius: 20px;
+        margin: 0 16px 12px;
+        display: flex;
+        gap: 10px;
+      }
+      .chat-input-bar input {
+        flex: 1;
+        padding: 12px 16px;
+        border-radius: 24px;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        background: #ffffff;
+        color: var(--t);
+        font-size: 16px;
+        font-family: inherit;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .chat-input-bar input:focus {
+        outline: none;
+        border-color: var(--p);
+      }
+      .chat-send {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(135deg, var(--p), var(--pd));
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+      }
+
+      /* MATCH RESULTS */
+      .match-result {
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--r);
+        padding: 16px;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .match-result:hover {
+        border-color: rgba(13, 34, 64, 0.18);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(13, 34, 64, 0.1);
+      }
+      .match-result + .match-result {
+        margin-top: 12px;
+      }
+      .match-result:active {
+        transform: scale(0.98);
+      }
+      .match-percent {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 3px solid var(--p);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 15px;
+        color: var(--p);
+        flex-shrink: 0;
+      }
+      .match-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .match-info h4 {
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .match-info p {
+        font-size: 12px;
+        color: var(--tl);
+        margin-top: 2px;
+      }
+      .match-reason {
+        font-size: 12px;
+        color: var(--pl);
+        background: var(--glow);
+        padding: 4px 10px;
+        border-radius: 8px;
+        margin-top: 6px;
+        display: inline-block;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+      }
+
+      /* BOOKING */
+      .booking-summary {
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--r);
+        padding: 20px;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+      }
+      .booking-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        font-size: 14px;
+      }
+      .booking-row.total {
+        font-weight: 700;
+        font-size: 16px;
+        border-top: 1px solid var(--b2);
+        margin-top: 8px;
+        padding-top: 12px;
+        color: var(--t);
+      }
+
+      /* SUCCESS */
+      .success-screen {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 100dvh;
+        padding: 40px 24px;
+      }
+      .success-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        margin-bottom: 24px;
+        animation: pulse 0.6s ease;
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.1);
+      }
+
+      /* BOOKINGS TAB */
+      .booking-card {
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--r);
+        padding: 16px;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+      }
+      .booking-card + .booking-card {
+        margin-top: 12px;
+      }
+      .status-upcoming {
+        background: rgba(99, 102, 241, 0.12);
+        color: var(--pl);
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 10px;
+      }
+      .status-completed {
+        background: rgba(16, 185, 129, 0.12);
+        color: #34d399;
+        border-color: rgba(16, 185, 129, 0.25);
+      }
+
+      /* PROFILE TAB */
+      .user-profile-header {
+        padding: calc(var(--st) + 24px) 20px 24px;
+        background: #ffffff;
+        backdrop-filter: blur(3px) saturate(120%);
+        -webkit-backdrop-filter: blur(3px) saturate(120%);
+        text-align: center;
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        border-radius: 24px;
+        margin: 12px 16px;
+      }
+      .user-profile-header .avatar {
+        margin: 0 auto 12px;
+      }
+      .user-profile-header h2 {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .user-profile-header p {
+        font-size: 14px;
+        color: var(--tl);
+      }
+      .menu-list {
+        padding: 12px 20px;
+        background: #ffffff;
+        backdrop-filter: blur(3px) saturate(120%);
+        -webkit-backdrop-filter: blur(3px) saturate(120%);
+        border: 1px solid rgba(13, 34, 64, 0.08);
+        border-radius: 24px;
+        margin: 12px 16px;
+      }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 0;
+        border-bottom: 1px solid rgba(13, 34, 64, 0.08);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .menu-item:last-child {
+        border: none;
+      }
+      .menu-item .mi {
+        width: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--pl);
+      }
+      .menu-item .ml {
+        flex: 1;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--t);
+      }
+      .menu-item .arrow {
+        color: var(--tlr);
+      }
+
+      /* EMPTY */
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 40px;
+        text-align: center;
+      }
+      .empty-state .icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+      }
+      .empty-state h3 {
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .empty-state p {
+        font-size: 14px;
+        color: var(--tl);
+        margin-top: 8px;
+      }
+
+      /* PSYCH ONBOARD */
+      .psych-step {
+        background: #ffffff;
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        border-radius: var(--r);
+        padding: 20px;
+        box-shadow:
+          0 4px 24px rgba(0, 0, 0, 0.25),
+          inset 0 1px 0 #f6f8fc;
+        margin-bottom: 16px;
+      }
+      .psych-step h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .psych-step .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--p);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .psych-step .field {
+        margin-bottom: 12px;
+      }
+      .psych-step .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--tl);
+        margin-bottom: 6px;
+      }
+      .psych-step textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: var(--rs);
+        border: 1px solid rgba(13, 34, 64, 0.1);
+        background: #ffffff;
+        color: var(--t);
+        font-size: 14px;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 80px;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .psych-step textarea:focus {
+        outline: none;
+        border-color: var(--p);
+        box-shadow: 0 0 0 3px var(--glow);
+      }
+      .photo-upload {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px dashed rgba(13, 34, 64, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--tlr);
+        cursor: pointer;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas class="bg-canvas" id="heroWave"></canvas>
+    <!-- ===== SVG LOGO TEMPLATE ===== -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+      <symbol id="mm-logo-white" viewBox="0 0 120 120">
+        <rect
+          x="48"
+          y="8"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".5"
+        />
+        <rect
+          x="60"
+          y="8"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".7"
+        />
+        <rect
+          x="36"
+          y="20"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".6"
+        />
+        <rect x="48" y="20" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="60" y="20" width="8" height="8" rx="1.5" fill="white" />
+        <rect
+          x="72"
+          y="20"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".6"
+        />
+        <rect
+          x="24"
+          y="32"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".5"
+        />
+        <rect x="36" y="32" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="48" y="32" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="60" y="32" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="72" y="32" width="8" height="8" rx="1.5" fill="white" />
+        <rect
+          x="84"
+          y="32"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".5"
+        />
+        <rect
+          x="24"
+          y="44"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".7"
+        />
+        <rect x="36" y="44" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="48" y="44" width="8" height="8" rx="1.5" fill="#c7d2fe" />
+        <rect x="60" y="44" width="8" height="8" rx="1.5" fill="#c7d2fe" />
+        <rect x="72" y="44" width="8" height="8" rx="1.5" fill="white" />
+        <rect
+          x="84"
+          y="44"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".7"
+        />
+        <rect
+          x="12"
+          y="56"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".4"
+        />
+        <rect x="24" y="56" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="36" y="56" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="48" y="56" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="60" y="56" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="72" y="56" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="84" y="56" width="8" height="8" rx="1.5" fill="white" />
+        <rect
+          x="96"
+          y="56"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".4"
+        />
+        <rect
+          x="24"
+          y="68"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".6"
+        />
+        <rect x="36" y="68" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="48" y="68" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="60" y="68" width="8" height="8" rx="1.5" fill="white" />
+        <rect x="72" y="68" width="8" height="8" rx="1.5" fill="white" />
+        <rect
+          x="84"
+          y="68"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".6"
+        />
+        <rect
+          x="36"
+          y="80"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".5"
+        />
+        <rect
+          x="48"
+          y="80"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".7"
+        />
+        <rect
+          x="60"
+          y="80"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".7"
+        />
+        <rect
+          x="72"
+          y="80"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".5"
+        />
+        <rect
+          x="48"
+          y="92"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".3"
+        />
+        <rect
+          x="60"
+          y="92"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="white"
+          opacity=".3"
+        />
+      </symbol>
+      <symbol id="mm-logo-color" viewBox="0 0 120 120">
+        <rect
+          x="48"
+          y="8"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".5"
+        />
+        <rect
+          x="60"
+          y="8"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".7"
+        />
+        <rect
+          x="36"
+          y="20"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".6"
+        />
+        <rect x="48" y="20" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="60" y="20" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect
+          x="72"
+          y="20"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".6"
+        />
+        <rect
+          x="24"
+          y="32"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".5"
+        />
+        <rect x="36" y="32" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="48" y="32" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="60" y="32" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="72" y="32" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect
+          x="84"
+          y="32"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".5"
+        />
+        <rect
+          x="24"
+          y="44"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".7"
+        />
+        <rect x="36" y="44" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="48" y="44" width="8" height="8" rx="1.5" fill="#818cf8" />
+        <rect x="60" y="44" width="8" height="8" rx="1.5" fill="#818cf8" />
+        <rect x="72" y="44" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect
+          x="84"
+          y="44"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".7"
+        />
+        <rect
+          x="12"
+          y="56"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".4"
+        />
+        <rect x="24" y="56" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="36" y="56" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="48" y="56" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="60" y="56" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="72" y="56" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="84" y="56" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect
+          x="96"
+          y="56"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".4"
+        />
+        <rect
+          x="24"
+          y="68"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".6"
+        />
+        <rect x="36" y="68" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="48" y="68" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="60" y="68" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect x="72" y="68" width="8" height="8" rx="1.5" fill="#6366f1" />
+        <rect
+          x="84"
+          y="68"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".6"
+        />
+        <rect
+          x="36"
+          y="80"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".5"
+        />
+        <rect
+          x="48"
+          y="80"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".7"
+        />
+        <rect
+          x="60"
+          y="80"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".7"
+        />
+        <rect
+          x="72"
+          y="80"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".5"
+        />
+        <rect
+          x="48"
+          y="92"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".3"
+        />
+        <rect
+          x="60"
+          y="92"
+          width="8"
+          height="8"
+          rx="1.5"
+          fill="#6366f1"
+          opacity=".3"
+        />
+      </symbol>
+    </svg>
+
+    <!-- BACK ARROW SVG (reused) -->
+    <svg style="display: none">
+      <symbol
+        id="arrow-back"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+      >
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </symbol>
+    </svg>
+
+    <!-- ==================== ONBOARDING ==================== -->
+    <div id="onboarding" class="screen no-tabs active">
+      <div class="onb-inner">
+        <div class="onb-hero">
+          <svg width="72" height="72"><use href="#mm-logo-white" /></svg>
+          <h1>MindMatch</h1>
+          <p>Find your perfect psychologist match in Lisbon</p>
+        </div>
+        <div class="onb-actions">
+          <button class="btn btn-white" onclick="openSheet('patient')">
+            Get Started
+          </button>
+          <button class="btn btn-outline-white" onclick="openSheet('psych')">
+            I'm a Psychologist
+          </button>
+          <div class="onb-sub">
+            Join 2,000+ people finding mental health support
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SIGNUP SHEET (patient) ==================== -->
+    <div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet()"></div>
+    <div class="sheet" id="signup-sheet">
+      <div class="sheet-handle"></div>
+      <svg width="48" height="48" style="display: block; margin: 0 auto">
+        <use href="#mm-logo-color" />
+      </svg>
+      <h2 id="sheet-title">Welcome to MindMatch</h2>
+      <p class="sub" id="sheet-sub">Create your account to get started</p>
+      <div class="sheet-form">
+        <button class="social-btn" onclick="loginAndGoHome()">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+              fill="#4285F4"
+            />
+            <path
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              fill="#34A853"
+            />
+            <path
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              fill="#FBBC05"
+            />
+            <path
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              fill="#EA4335"
+            />
+          </svg>
+          Continue with Google
+        </button>
+        <button class="social-btn" onclick="loginAndGoHome()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.83 7.15C10.09 7.13 11.29 8.01 12.08 8.01C12.87 8.01 14.34 6.94 15.86 7.11C16.49 7.14 18.3 7.37 19.42 9.1C19.33 9.16 17.15 10.42 17.18 13.04C17.21 16.14 19.95 17.18 19.98 17.19C19.96 17.25 19.48 18.89 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.59 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.37 4.26 13 3.5Z"
+            />
+          </svg>
+          Continue with Apple
+        </button>
+        <div class="or-divider">or</div>
+        <input type="email" class="input" placeholder="Email address" />
+        <input type="password" class="input" placeholder="Password" />
+        <button class="btn btn-primary" onclick="loginAndGoHome()">
+          Create Account
+        </button>
+        <p style="text-align: center; font-size: 14px; color: var(--tl)">
+          Already have an account?
+          <a
+            href="#"
+            onclick="loginAndGoHome()"
+            style="color: var(--pl); font-weight: 600"
+            >Sign in</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <!-- ==================== HOME ==================== -->
+    <div id="home" class="screen">
+      <div class="home-header">
+        <div class="greeting">Good morning</div>
+        <h1>Find Your Match</h1>
+        <div class="search-bar" onclick="go('search')">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" /></svg
+          >Search by name, specialty...
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Quick Categories</div>
+        <div class="quick-filters">
+          <div class="quick-filter" onclick="filterBy('Anxiety')">
+            <div class="icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3.75 12h2.25l2.25-6 3 12 3-9 2.25 3h3.75"
+                />
+              </svg>
+            </div>
+            <div class="label">Anxiety</div>
+          </div>
+          <div class="quick-filter" onclick="filterBy('Depression')">
+            <div class="icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 000-7.5A5.25 5.25 0 007.5 9a5.228 5.228 0 00-5.25 6z"
+                />
+              </svg>
+            </div>
+            <div class="label">Depression</div>
+          </div>
+          <div class="quick-filter" onclick="filterBy('Relationships')">
+            <div class="icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                />
+              </svg>
+            </div>
+            <div class="label">Couples</div>
+          </div>
+          <div class="quick-filter" onclick="filterBy('Stress')">
+            <div class="icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+                />
+              </svg>
+            </div>
+            <div class="label">Stress</div>
+          </div>
+          <div class="quick-filter" onclick="filterBy('Trauma')">
+            <div class="icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 21V12m0 0c0-3.314 2.686-6 6-6a6 6 0 01-6 6zm0 0c0-3.314-2.686-6-6-6a6 6 0 006 6z"
+                />
+              </svg>
+            </div>
+            <div class="label">Trauma</div>
+          </div>
+          <div class="quick-filter" onclick="filterBy('Self-Esteem')">
+            <div class="icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                />
+              </svg>
+            </div>
+            <div class="label">Self-Esteem</div>
+          </div>
+        </div>
+      </div>
+      <div class="section" style="padding-top: 0">
+        <div class="match-banner" onclick="go('ai-match')">
+          <div class="m-icon">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3>AI Deep Match</h3>
+            <p>Answer a few questions, get your top 3 matches</p>
+          </div>
+          <div class="price">€9.99</div>
+        </div>
+      </div>
+      <div class="section" style="padding-top: 0">
+        <div class="section-title">
+          Featured in Lisbon <a href="#" onclick="go('search')">See all</a>
+        </div>
+        <div class="featured-scroll" id="featured-scroll"></div>
+      </div>
+      <div class="section" style="padding-top: 0">
+        <div class="section-title">
+          Top Rated <a href="#" onclick="go('search')">See all</a>
+        </div>
+        <div id="top-rated-list"></div>
+      </div>
+    </div>
+
+    <!-- ==================== SEARCH ==================== -->
+    <div id="search" class="screen">
+      <div class="header" style="padding-bottom: 12px">
+        <div style="display: flex; gap: 10px; align-items: center">
+          <button class="back-btn" onclick="go('home')">
+            <svg width="20" height="20"><use href="#arrow-back" /></svg>
+          </button>
+          <input
+            type="text"
+            class="input"
+            placeholder="Search psychologists..."
+            style="flex: 1"
+            id="search-input"
+            oninput="searchPrac(this.value)"
+          />
+        </div>
+        <div class="chip-group" style="margin-top: 12px" id="filter-chips">
+          <div class="chip selected" onclick="toggleFilter(this, 'All')">
+            All
+          </div>
+          <div class="chip" onclick="toggleFilter(this, 'Anxiety')">
+            Anxiety
+          </div>
+          <div class="chip" onclick="toggleFilter(this, 'Depression')">
+            Depression
+          </div>
+          <div class="chip" onclick="toggleFilter(this, 'CBT')">CBT</div>
+          <div class="chip" onclick="toggleFilter(this, 'Couples')">
+            Couples
+          </div>
+          <div class="chip" onclick="toggleFilter(this, 'Trauma')">Trauma</div>
+        </div>
+      </div>
+      <div class="section" id="search-results"></div>
+    </div>
+
+    <!-- ==================== PRACTITIONER PROFILE ==================== -->
+    <div id="profile" class="screen no-tabs">
+      <div class="profile-hero">
+        <button class="back-btn" onclick="goBack()">
+          <svg width="20" height="20"><use href="#arrow-back" /></svg>
+        </button>
+        <div class="avatar avatar-lg" id="p-avatar"></div>
+        <h1 id="p-name"></h1>
+        <div class="subtitle" id="p-spec"></div>
+        <div class="stars" id="p-stars"></div>
+        <div class="profile-stats">
+          <div class="stat">
+            <div class="num" id="p-exp"></div>
+            <div class="lbl">Years Exp.</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="p-pat"></div>
+            <div class="lbl">Patients</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="p-rev"></div>
+            <div class="lbl">Reviews</div>
+          </div>
+        </div>
+      </div>
+      <div class="profile-section">
+        <h3>About</h3>
+        <p id="p-bio"></p>
+      </div>
+      <div class="profile-section" style="padding-top: 0">
+        <h3>Specialties</h3>
+        <div class="chip-group" id="p-tags" style="margin-top: 8px"></div>
+      </div>
+      <div class="profile-section" style="padding-top: 0">
+        <h3>Approach</h3>
+        <ul class="approach-list" id="p-approach"></ul>
+      </div>
+      <div class="profile-section" style="padding-top: 0">
+        <h3>Languages</h3>
+        <p id="p-lang"></p>
+      </div>
+      <div class="profile-section" style="padding-top: 0">
+        <h3>Location</h3>
+        <p id="p-loc"></p>
+      </div>
+      <div style="height: 120px"></div>
+      <div class="profile-bottom">
+        <div class="price-info">
+          <div class="from">From</div>
+          <div class="amount" id="p-price"></div>
+          <div class="per">/session</div>
+        </div>
+        <button class="btn btn-primary" onclick="go('packages')">
+          Book Now
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== PACKAGES ==================== -->
+    <div id="packages" class="screen no-tabs">
+      <div class="header-back">
+        <button class="back-btn" onclick="go('profile')">
+          <svg width="20" height="20"><use href="#arrow-back" /></svg>
+        </button>
+        <div>
+          <div style="font-size: 18px; font-weight: 700">Choose a Package</div>
+          <div style="font-size: 13px; color: var(--tl)" id="pkg-prac"></div>
+        </div>
+      </div>
+      <div class="section" id="packages-list"></div>
+      <div class="section" style="padding-top: 0">
+        <div
+          class="card"
+          style="
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+          "
+        >
+          <div style="display: flex; gap: 10px; align-items: center">
+            <span
+              style="
+                font-size: 24px;
+                display: flex;
+                align-items: center;
+                color: var(--pl);
+              "
+              ><svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                /></svg
+            ></span>
+            <div>
+              <div style="font-weight: 700; font-size: 14px; color: var(--pl)">
+                Swap Protection
+              </div>
+              <div style="font-size: 12px; color: var(--tl)">
+                Not the right fit? Swap to another psychologist within 30 days.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section" style="padding-top: 0">
+        <button class="btn btn-primary" onclick="go('checkout')">
+          Continue to Checkout
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== CHECKOUT ==================== -->
+    <div id="checkout" class="screen no-tabs">
+      <div class="header-back">
+        <button class="back-btn" onclick="go('packages')">
+          <svg width="20" height="20"><use href="#arrow-back" /></svg>
+        </button>
+        <div style="font-size: 18px; font-weight: 700">Checkout</div>
+      </div>
+      <div class="section">
+        <div class="booking-summary">
+          <div
+            style="
+              display: flex;
+              gap: 12px;
+              align-items: center;
+              margin-bottom: 16px;
+            "
+          >
+            <div
+              class="avatar"
+              id="co-avatar"
+              style="width: 48px; height: 48px; font-size: 18px"
+            ></div>
+            <div>
+              <div style="font-weight: 700" id="co-name"></div>
+              <div style="font-size: 13px; color: var(--tl)" id="co-pkg"></div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="booking-row">
+            <span>Package</span><span id="co-price"></span>
+          </div>
+          <div class="booking-row">
+            <span>Platform fee</span><span>€0.00</span>
+          </div>
+          <div class="booking-row total">
+            <span>Total</span><span id="co-total"></span>
+          </div>
+        </div>
+      </div>
+      <div class="section" style="padding-top: 0">
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px">
+          Payment Method
+        </h3>
+        <div
+          class="card"
+          style="
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            border: 1px solid var(--p);
+          "
+        >
+          <span
+            style="
+              font-size: 24px;
+              display: flex;
+              align-items: center;
+              color: var(--pl);
+            "
+            ><svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+              /></svg
+          ></span>
+          <div>
+            <div style="font-weight: 600; font-size: 14px">Visa •••• 4242</div>
+            <div style="font-size: 12px; color: var(--tl)">Expires 12/27</div>
+          </div>
+          <div style="margin-left: auto; color: var(--p)">✓</div>
+        </div>
+      </div>
+      <div class="section" style="padding-top: 0">
+        <button class="btn btn-primary" onclick="completeBooking()">
+          Pay <span id="co-pay"></span>
+        </button>
+        <p
+          style="
+            text-align: center;
+            font-size: 12px;
+            color: var(--tlr);
+            margin-top: 12px;
+          "
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            style="vertical-align: -2px; display: inline"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+            />
+          </svg>
+          Secured by Stripe. Cancel anytime.
+        </p>
+      </div>
+    </div>
+
+    <!-- ==================== SUCCESS ==================== -->
+    <div id="success" class="screen no-tabs">
+      <div class="success-screen">
+        <div class="success-icon">✓</div>
+        <h1>Booking Confirmed!</h1>
+        <p>
+          Your sessions with <strong id="suc-name"></strong> are booked. Check
+          your email for confirmation.
+        </p>
+        <div
+          style="
+            margin-top: 32px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <button
+            class="btn btn-primary"
+            onclick="
+              go('bookings');
+              showTabs();
+            "
+          >
+            View My Bookings
+          </button>
+          <button
+            class="btn btn-ghost"
+            onclick="
+              go('home');
+              showTabs();
+            "
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== AI MATCH ==================== -->
+    <div id="ai-match" class="screen no-tabs">
+      <div class="chat-container">
+        <div class="header-back">
+          <button
+            class="back-btn"
+            onclick="
+              go('home');
+              showTabs();
+            "
+          >
+            <svg width="20" height="20"><use href="#arrow-back" /></svg>
+          </button>
+          <div>
+            <div
+              style="
+                font-size: 16px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              "
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--pl)"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
+                />
+              </svg>
+              AI Deep Match
+            </div>
+            <div style="font-size: 12px; color: var(--tl)">
+              Finding your perfect therapist
+            </div>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-bar" id="chat-input-bar" style="display: none">
+          <input
+            type="text"
+            placeholder="Type your answer..."
+            id="chat-input"
+            onkeydown="if (event.key === 'Enter') sendChat();"
+          />
+          <button class="chat-send" onclick="sendChat()">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M22 2 11 13M22 2l-7 20-4-9-9-4z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MATCH RESULTS ==================== -->
+    <div id="match-results" class="screen no-tabs">
+      <div class="header-back">
+        <button
+          class="back-btn"
+          onclick="
+            go('home');
+            showTabs();
+          "
+        >
+          <svg width="20" height="20"><use href="#arrow-back" /></svg>
+        </button>
+        <div>
+          <div
+            style="
+              font-size: 18px;
+              font-weight: 700;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            "
+          >
+            Your Top Matches
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--pl)"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
+              />
+            </svg>
+          </div>
+          <div style="font-size: 12px; color: var(--tl)">
+            Based on your preferences
+          </div>
+        </div>
+      </div>
+      <div class="section" id="match-results-list"></div>
+      <div class="section" style="padding-top: 0">
+        <button
+          class="btn btn-outline"
+          onclick="
+            go('search');
+            showTabs();
+          "
+        >
+          Browse All Psychologists
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== BOOKINGS ==================== -->
+    <div id="bookings" class="screen">
+      <div class="header">
+        <h1 style="font-size: 24px; font-weight: 700">My Bookings</h1>
+      </div>
+      <div class="section" id="bookings-list"></div>
+    </div>
+
+    <!-- ==================== ME ==================== -->
+    <div id="me" class="screen">
+      <div class="user-profile-header">
+        <div class="avatar avatar-lg" style="font-size: 36px">M</div>
+        <h2>Maria Silva</h2>
+        <p>Lisbon, Portugal</p>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item">
+          <div class="mi">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+              />
+            </svg>
+          </div>
+          <div class="ml">Edit Profile</div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="mi">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+              />
+            </svg>
+          </div>
+          <div class="ml">Payment Methods</div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="mi">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+              />
+            </svg>
+          </div>
+          <div class="ml">Notifications</div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="mi">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
+              />
+            </svg>
+          </div>
+          <div class="ml">Language</div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="mi">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+              />
+            </svg>
+          </div>
+          <div class="ml">Privacy & Security</div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="menu-item">
+          <div class="mi">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827m0 3v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div class="ml">Help & Support</div>
+          <div class="arrow">›</div>
+        </div>
+        <div
+          class="menu-item"
+          onclick="
+            go('onboarding');
+            hideTabs();
+          "
+        >
+          <div class="mi">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+              />
+            </svg>
+          </div>
+          <div class="ml" style="color: var(--err)">Log Out</div>
+          <div class="arrow">›</div>
+        </div>
+      </div>
+      <p
+        style="
+          text-align: center;
+          font-size: 12px;
+          color: var(--tlr);
+          padding: 20px;
+        "
+      >
+        MindMatch v1.0 — Made in Lisbon 🇵🇹
+      </p>
+    </div>
+
+    <!-- ==================== PSYCHOLOGIST ONBOARDING ==================== -->
+    <div id="psych-onboard" class="screen no-tabs">
+      <div class="header-back">
+        <button class="back-btn" onclick="go('onboarding')">
+          <svg width="20" height="20"><use href="#arrow-back" /></svg>
+        </button>
+        <div>
+          <div style="font-size: 18px; font-weight: 700">
+            Join as a Psychologist
+          </div>
+          <div style="font-size: 12px; color: var(--tl)">
+            Set up your professional profile
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="psych-step">
+          <h3><span class="step-num">1</span> Basic Information</h3>
+          <div class="photo-upload">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"
+              />
+            </svg>
+          </div>
+          <p
+            style="
+              text-align: center;
+              font-size: 12px;
+              color: var(--tl);
+              margin: 8px 0 16px;
+            "
+          >
+            Upload profile photo
+          </p>
+          <div class="field">
+            <label>Full Name</label
+            ><input class="input" placeholder="Dr. Ana Ferreira" />
+          </div>
+          <div class="field">
+            <label>Bio</label
+            ><textarea
+              placeholder="Tell patients about yourself, your experience, and your approach..."
+            ></textarea>
+          </div>
+        </div>
+        <div class="psych-step">
+          <h3><span class="step-num">2</span> Credentials</h3>
+          <div class="field">
+            <label>OPP License Number</label
+            ><input class="input" placeholder="e.g. 12345" />
+          </div>
+          <div class="field">
+            <label>Specialization</label
+            ><input class="input" placeholder="e.g. Clinical Psychology" />
+          </div>
+          <div class="field">
+            <label>Years of Experience</label
+            ><input class="input" type="number" placeholder="e.g. 8" />
+          </div>
+        </div>
+        <div class="psych-step">
+          <h3><span class="step-num">3</span> Services</h3>
+          <div class="field">
+            <label>Session Price (€)</label
+            ><input class="input" type="number" placeholder="e.g. 65" />
+          </div>
+          <div class="field">
+            <label>Session Duration</label>
+            <div class="chip-group">
+              <div class="chip selected">50 min</div>
+              <div class="chip">60 min</div>
+              <div class="chip">90 min</div>
+            </div>
+          </div>
+          <div class="field" style="margin-top: 12px">
+            <label>Focus Areas</label>
+            <div class="chip-group">
+              <div class="chip">Anxiety</div>
+              <div class="chip">Depression</div>
+              <div class="chip">Trauma</div>
+              <div class="chip">Relationships</div>
+              <div class="chip">Stress</div>
+              <div class="chip">Self-Esteem</div>
+              <div class="chip">ADHD</div>
+              <div class="chip">OCD</div>
+              <div class="chip">Grief</div>
+            </div>
+          </div>
+          <div class="field" style="margin-top: 12px">
+            <label>Therapy Approach</label>
+            <div class="chip-group">
+              <div class="chip">CBT</div>
+              <div class="chip">Psychodynamic</div>
+              <div class="chip">EMDR</div>
+              <div class="chip">Humanistic</div>
+              <div class="chip">ACT</div>
+              <div class="chip">Systemic</div>
+            </div>
+          </div>
+        </div>
+        <div class="psych-step">
+          <h3><span class="step-num">4</span> Availability</h3>
+          <div class="field">
+            <label>Available Days</label>
+            <div class="chip-group">
+              <div class="chip">Mon</div>
+              <div class="chip">Tue</div>
+              <div class="chip">Wed</div>
+              <div class="chip">Thu</div>
+              <div class="chip">Fri</div>
+              <div class="chip">Sat</div>
+            </div>
+          </div>
+          <div class="field" style="margin-top: 12px">
+            <label>Working Hours</label>
+            <div style="display: flex; gap: 10px; align-items: center">
+              <input class="input" type="time" value="09:00" style="flex: 1" />
+              <span style="color: var(--tl)">to</span>
+              <input class="input" type="time" value="18:00" style="flex: 1" />
+            </div>
+          </div>
+        </div>
+        <div class="psych-step">
+          <h3><span class="step-num">5</span> Location</h3>
+          <div class="field">
+            <label>Office Address</label
+            ><input class="input" placeholder="e.g. Rua Augusta 123, Lisbon" />
+          </div>
+          <div class="field">
+            <label>Neighborhood</label>
+            <div class="chip-group">
+              <div class="chip">Chiado</div>
+              <div class="chip">Príncipe Real</div>
+              <div class="chip">Saldanha</div>
+              <div class="chip">Avenidas Novas</div>
+              <div class="chip">Campo de Ourique</div>
+              <div class="chip">Belém</div>
+            </div>
+          </div>
+          <div class="field" style="margin-top: 12px">
+            <label>Languages</label>
+            <div class="chip-group">
+              <div class="chip selected">Portuguese</div>
+              <div class="chip">English</div>
+              <div class="chip">Spanish</div>
+              <div class="chip">French</div>
+              <div class="chip">German</div>
+            </div>
+          </div>
+        </div>
+        <button
+          class="btn btn-primary"
+          onclick="submitPsychProfile()"
+          style="margin-top: 8px"
+        >
+          Submit for Review
+        </button>
+        <p
+          style="
+            text-align: center;
+            font-size: 12px;
+            color: var(--tlr);
+            margin-top: 12px;
+          "
+        >
+          Your profile will be reviewed within 24-48 hours
+        </p>
+      </div>
+    </div>
+
+    <!-- ==================== PSYCH SUCCESS ==================== -->
+    <div id="psych-success" class="screen no-tabs">
+      <div class="success-screen">
+        <div class="success-icon">✓</div>
+        <h1>Profile Submitted!</h1>
+        <p>
+          Thank you for joining MindMatch. Our team will review your credentials
+          and activate your profile within 24-48 hours.
+        </p>
+        <p style="margin-top: 16px; font-size: 14px; color: var(--tl)">
+          You'll receive an email at your registered address once approved.
+        </p>
+        <div
+          style="
+            margin-top: 32px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <button class="btn btn-primary" onclick="go('onboarding')">
+            Back to Home
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB BAR ==================== -->
+    <div class="tab-bar hidden" id="tab-bar">
+      <button class="tab active" onclick="switchTab('home', this)">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" /></svg
+        >Home
+      </button>
+      <button class="tab" onclick="switchTab('search', this)">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" /></svg
+        >Search
+      </button>
+      <button class="tab" onclick="switchTab('ai-match', this)">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 4a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zm4.5 11.5a7.5 7.5 0 0 1-9 0C8 16 9.5 15 12 15s4 1 4.5 2.5z"
+          /></svg
+        >AI Match
+      </button>
+      <button class="tab" onclick="switchTab('bookings', this)">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" /></svg
+        >Bookings
+      </button>
+      <button class="tab" onclick="switchTab('me', this)">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" /></svg
+        >Me
+      </button>
+    </div>
+
+    <script>
+      // ==================== DATA ====================
+      const practitioners = [
+        {
+          id: 1,
+          name: "Dra. Ana Ferreira",
+          initials: "AF",
+          specialty: "Clinical Psychology",
+          focus: ["Anxiety", "Depression", "Stress"],
+          approach: [
+            "Cognitive Behavioral Therapy (CBT)",
+            "Mindfulness-Based Therapy",
+            "Acceptance & Commitment Therapy",
+          ],
+          bio: "With 8 years of experience, I specialize in helping young adults navigate anxiety and depression. My approach combines CBT with mindfulness techniques, creating a warm and non-judgmental space for growth.",
+          rating: 4.9,
+          reviews: 127,
+          experience: 8,
+          patients: 340,
+          price: 65,
+          languages: "Portuguese, English",
+          location: "Chiado, Lisbon",
+          gender: "F",
+          availableSlots: ["Mon 10:00", "Wed 14:00", "Fri 09:00"],
+        },
+        {
+          id: 2,
+          name: "Dr. Miguel Santos",
+          initials: "MS",
+          specialty: "Psychotherapy",
+          focus: ["Relationships", "Self-Esteem", "Life Transitions"],
+          approach: [
+            "Psychodynamic Therapy",
+            "Person-Centered Therapy",
+            "Integrative Approach",
+          ],
+          bio: "I believe everyone has the capacity for change. Specializing in relationships and self-esteem, I help clients understand patterns that hold them back and develop healthier ways of relating.",
+          rating: 4.8,
+          reviews: 98,
+          experience: 12,
+          patients: 520,
+          price: 75,
+          languages: "Portuguese, English, Spanish",
+          location: "Príncipe Real, Lisbon",
+          gender: "M",
+          availableSlots: ["Tue 11:00", "Thu 16:00", "Sat 10:00"],
+        },
+        {
+          id: 3,
+          name: "Dra. Sofia Lopes",
+          initials: "SL",
+          specialty: "Clinical Psychology",
+          focus: ["Trauma", "PTSD", "Grief"],
+          approach: ["EMDR", "Trauma-Focused CBT", "Somatic Experiencing"],
+          bio: "Specialized in trauma recovery using evidence-based EMDR therapy. I provide a safe, compassionate space for healing, helping clients process difficult experiences and rebuild their sense of safety.",
+          rating: 4.9,
+          reviews: 156,
+          experience: 10,
+          patients: 410,
+          price: 80,
+          languages: "Portuguese, English, French",
+          location: "Saldanha, Lisbon",
+          gender: "F",
+          availableSlots: ["Mon 15:00", "Wed 10:00", "Fri 14:00"],
+        },
+        {
+          id: 4,
+          name: "Dr. Pedro Almeida",
+          initials: "PA",
+          specialty: "Neuropsychology",
+          focus: ["ADHD", "Stress", "Performance Anxiety"],
+          approach: [
+            "Cognitive Behavioral Therapy",
+            "Neurofeedback",
+            "Behavioral Activation",
+          ],
+          bio: "As a neuropsychologist, I take a science-based approach to mental health. I help professionals dealing with burnout, ADHD, and performance anxiety develop practical strategies that work.",
+          rating: 4.7,
+          reviews: 84,
+          experience: 6,
+          patients: 230,
+          price: 70,
+          languages: "Portuguese, English",
+          location: "Avenidas Novas, Lisbon",
+          gender: "M",
+          availableSlots: ["Tue 09:00", "Thu 11:00", "Fri 16:00"],
+        },
+        {
+          id: 5,
+          name: "Dra. Inês Rocha",
+          initials: "IR",
+          specialty: "Couples Therapy",
+          focus: ["Relationships", "Communication", "Intimacy"],
+          approach: [
+            "Emotionally Focused Therapy",
+            "Gottman Method",
+            "Systemic Therapy",
+          ],
+          bio: "I specialize in helping couples reconnect and strengthen their relationship. Using the Gottman Method and EFT, I guide partners through conflict resolution and deeper emotional bonding.",
+          rating: 4.8,
+          reviews: 112,
+          experience: 9,
+          patients: 280,
+          price: 90,
+          languages: "Portuguese, English",
+          location: "Campo de Ourique, Lisbon",
+          gender: "F",
+          availableSlots: ["Mon 18:00", "Wed 18:00", "Sat 11:00"],
+        },
+        {
+          id: 6,
+          name: "Dr. Tiago Martins",
+          initials: "TM",
+          specialty: "Child & Adolescent Psychology",
+          focus: ["Anxiety", "Self-Esteem", "School Issues"],
+          approach: [
+            "Play Therapy",
+            "CBT for Children",
+            "Family Systems Therapy",
+          ],
+          bio: "Working with children and teens ages 6-18, I use creative and engaging methods to help young people build confidence, manage emotions, and thrive at school and home.",
+          rating: 4.9,
+          reviews: 145,
+          experience: 7,
+          patients: 390,
+          price: 60,
+          languages: "Portuguese, English",
+          location: "Benfica, Lisbon",
+          gender: "M",
+          availableSlots: ["Mon 14:00", "Wed 16:00", "Fri 10:00"],
+        },
+      ];
+
+      // Generate 50 more practitioners
+      (function () {
+        const fnF = [
+          "Mariana",
+          "Beatriz",
+          "Carolina",
+          "Diana",
+          "Eva",
+          "Filipa",
+          "Helena",
+          "Joana",
+          "Leonor",
+          "Marta",
+          "Nádia",
+          "Patrícia",
+          "Rita",
+          "Sara",
+          "Teresa",
+          "Vanessa",
+          "Catarina",
+          "Daniela",
+          "Francisca",
+          "Gabriela",
+          "Isabel",
+          "Laura",
+          "Mafalda",
+          "Raquel",
+          "Vera",
+        ];
+        const fnM = [
+          "André",
+          "Bruno",
+          "Carlos",
+          "Diogo",
+          "Eduardo",
+          "Francisco",
+          "Gonçalo",
+          "Hugo",
+          "João",
+          "Luís",
+          "Marco",
+          "Nuno",
+          "Paulo",
+          "Ricardo",
+          "Sérgio",
+          "Tomás",
+          "Afonso",
+          "Bernardo",
+          "David",
+          "Filipe",
+          "Guilherme",
+          "Henrique",
+          "José",
+          "Manuel",
+          "Rafael",
+        ];
+        const ln = [
+          "Silva",
+          "Santos",
+          "Ferreira",
+          "Pereira",
+          "Oliveira",
+          "Costa",
+          "Rodrigues",
+          "Martins",
+          "Sousa",
+          "Fernandes",
+          "Gonçalves",
+          "Gomes",
+          "Lopes",
+          "Marques",
+          "Almeida",
+          "Ribeiro",
+          "Pinto",
+          "Carvalho",
+          "Teixeira",
+          "Moreira",
+          "Correia",
+          "Mendes",
+          "Nunes",
+          "Vieira",
+          "Cardoso",
+        ];
+        const specs = [
+          "Clinical Psychology",
+          "Psychotherapy",
+          "Neuropsychology",
+          "Health Psychology",
+          "Positive Psychology",
+          "Integrative Psychology",
+          "Existential Therapy",
+          "Gestalt Therapy",
+        ];
+        const foci = [
+          ["Anxiety", "Depression", "Stress"],
+          ["Relationships", "Self-Esteem", "Communication"],
+          ["Trauma", "PTSD", "Grief"],
+          ["ADHD", "Performance Anxiety", "Burnout"],
+          ["Sleep Disorders", "Stress", "Mindfulness"],
+          ["Eating Disorders", "Body Image", "Self-Esteem"],
+          ["OCD", "Phobias", "Anxiety"],
+          ["Career Counseling", "Life Transitions", "Purpose"],
+          ["Anger Management", "Emotional Regulation", "Stress"],
+          ["Addiction", "Recovery", "Relapse Prevention"],
+          ["Social Anxiety", "Shyness", "Confidence"],
+          ["Parenting", "Family Conflict", "Communication"],
+          ["Depression", "Loneliness", "Isolation"],
+          ["Chronic Pain", "Health Anxiety", "Coping"],
+          ["Identity", "LGBTQ+", "Self-Discovery"],
+          ["Perfectionism", "Procrastination", "Motivation"],
+          ["Bereavement", "Loss", "Grief Counseling"],
+          ["Workplace Stress", "Leadership", "Work-Life Balance"],
+        ];
+        const apprs = [
+          [
+            "Cognitive Behavioral Therapy (CBT)",
+            "Mindfulness-Based Therapy",
+            "Solution-Focused Therapy",
+          ],
+          [
+            "Psychodynamic Therapy",
+            "Person-Centered Therapy",
+            "Integrative Approach",
+          ],
+          ["EMDR", "Trauma-Focused CBT", "Somatic Experiencing"],
+          ["Acceptance & Commitment Therapy", "DBT", "Behavioral Activation"],
+          ["Gestalt Therapy", "Existential Therapy", "Humanistic Approach"],
+          ["Schema Therapy", "Narrative Therapy", "Art Therapy"],
+          ["Systemic Therapy", "Family Therapy", "Attachment-Based Therapy"],
+          [
+            "Motivational Interviewing",
+            "Positive Psychology",
+            "Strengths-Based Approach",
+          ],
+        ];
+        const bios = [
+          "dedicated to helping clients discover their inner strengths and build resilience through evidence-based approaches.",
+          "passionate about creating a safe, non-judgmental space where clients can explore their thoughts and feelings freely.",
+          "combining traditional therapeutic techniques with modern neuroscience to deliver lasting change.",
+          "focused on empowering individuals to overcome challenges and live more fulfilling lives.",
+          "believing that every person has the capacity for growth, using compassionate and collaborative methods.",
+          "specializing in helping people navigate life's transitions with confidence and clarity.",
+          "using a holistic approach that addresses mind, body, and spirit in the healing process.",
+          "committed to providing culturally sensitive therapy that honors each client's unique background.",
+          "known for a warm, direct style that helps clients make meaningful progress quickly.",
+          "integrating mindfulness practices with evidence-based therapy for comprehensive mental wellness.",
+        ];
+        const locs = [
+          "Alfama, Lisbon",
+          "Belém, Lisbon",
+          "Graça, Lisbon",
+          "Lapa, Lisbon",
+          "Estrela, Lisbon",
+          "Alvalade, Lisbon",
+          "Lumiar, Lisbon",
+          "Parque das Nações, Lisbon",
+          "Alcântara, Lisbon",
+          "Santos, Lisbon",
+          "Intendente, Lisbon",
+          "Anjos, Lisbon",
+          "Arroios, Lisbon",
+          "Campolide, Lisbon",
+          "São Domingos de Benfica, Lisbon",
+          "Carnide, Lisbon",
+          "Ajuda, Lisbon",
+          "Marvila, Lisbon",
+          "Olivais, Lisbon",
+          "Penha de França, Lisbon",
+        ];
+        const langs = [
+          "Portuguese, English",
+          "Portuguese, English, Spanish",
+          "Portuguese, English, French",
+          "Portuguese, English, German",
+          "Portuguese, English, Italian",
+        ];
+        const R = (a) => a[Math.floor(Math.random() * a.length)];
+        for (let i = 7; i <= 56; i++) {
+          const f = Math.random() > 0.45;
+          const fN = f ? fnF : fnM;
+          const first = R(fN);
+          const last = R(ln);
+          const exp = 3 + Math.floor(Math.random() * 18);
+          practitioners.push({
+            id: i,
+            name: `${f ? "Dra." : "Dr."} ${first} ${last}`,
+            initials: `${first[0]}${last[0]}`,
+            specialty: R(specs),
+            focus: R(foci),
+            approach: R(apprs),
+            bio: `With ${exp} years of experience, I am ${R(bios)}`,
+            rating: parseFloat((4.3 + Math.random() * 0.7).toFixed(1)),
+            reviews: 20 + Math.floor(Math.random() * 180),
+            experience: exp,
+            patients: 80 + Math.floor(Math.random() * 600),
+            price: 50 + Math.floor(Math.random() * 6) * 5,
+            languages: R(langs),
+            location: R(locs),
+            gender: f ? "F" : "M",
+            availableSlots: ["Mon 10:00", "Wed 14:00", "Fri 16:00"],
+          });
+        }
+      })();
+
+      const pkgs = [
+        {
+          name: "Starter",
+          sessions: 3,
+          discount: 0,
+          features: [
+            "3 individual sessions",
+            "Swap protection",
+            "Email support",
+          ],
+        },
+        {
+          name: "Standard",
+          sessions: 5,
+          discount: 0.05,
+          features: [
+            "5 individual sessions",
+            "Swap protection",
+            "Priority booking",
+            "5% savings",
+          ],
+          popular: true,
+        },
+        {
+          name: "Deep Dive",
+          sessions: 10,
+          discount: 0.1,
+          features: [
+            "10 individual sessions",
+            "Swap protection",
+            "Priority booking",
+            "10% savings",
+            "Progress tracking",
+          ],
+        },
+      ];
+
+      let curPrac = null,
+        selPkg = 1,
+        prevScreen = "home",
+        hasBooking = false,
+        sheetMode = "patient";
+
+      // ==================== CHAT DATA ====================
+      const chatFlow = [
+        {
+          bot: "Hi there! 👋 I'm MindMatch AI. I'll help you find the perfect psychologist. This takes about 3 minutes.\n\nWhat's the main reason you're looking for support?",
+          options: [
+            "Anxiety or worry",
+            "Feeling down or depressed",
+            "Relationship issues",
+            "Stress or burnout",
+            "Trauma or past experiences",
+            "General self-improvement",
+          ],
+        },
+        {
+          bot: "Thank you for sharing. Have you been to therapy before?",
+          options: [
+            "No, this is my first time",
+            "Yes, a few sessions",
+            "Yes, I've been in therapy before",
+          ],
+        },
+        {
+          bot: "Got it. What's your preferred communication style with a therapist?",
+          options: [
+            "Direct and solution-focused",
+            "Warm and empathetic",
+            "Structured with homework",
+            "Open and exploratory",
+          ],
+        },
+        {
+          bot: "Do you have a gender preference for your psychologist?",
+          options: ["Female preferred", "Male preferred", "No preference"],
+        },
+        {
+          bot: "Last question — what's your budget per session?",
+          options: ["Under €65", "€65 - €80", "€80+", "Flexible"],
+        },
+      ];
+      let chatStep = 0;
+
+      // ==================== NAVIGATION ====================
+      function go(id) {
+        document.querySelectorAll(".screen").forEach((s) => {
+          s.classList.remove("active");
+          s.style.display = "none";
+        });
+        const t = document.getElementById(id);
+        t.classList.add("active");
+        t.style.display = "block";
+        if (
+          [
+            "onboarding",
+            "profile",
+            "packages",
+            "checkout",
+            "success",
+            "ai-match",
+            "match-results",
+            "psych-onboard",
+            "psych-success",
+          ].includes(id)
+        )
+          hideTabs();
+        else showTabs();
+        if (id === "home") renderHome();
+        if (id === "search") renderSearch();
+        if (id === "ai-match") startChat();
+        if (id === "bookings") renderBookings();
+        if (id === "packages") renderPackages();
+        if (id === "checkout") renderCheckout();
+      }
+
+      function switchTab(id, el) {
+        if (id === "ai-match") hideTabs();
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        el.classList.add("active");
+        prevScreen = id;
+        go(id);
+      }
+
+      function hideTabs() {
+        document.getElementById("tab-bar").classList.add("hidden");
+      }
+      function showTabs() {
+        document.getElementById("tab-bar").classList.remove("hidden");
+      }
+      function goBack() {
+        go(prevScreen);
+        showTabs();
+      }
+
+      // ==================== SHEET (slide-up login) ====================
+      function openSheet(mode) {
+        sheetMode = mode;
+        if (mode === "psych") {
+          closeSheet();
+          go("psych-onboard");
+          return;
+        }
+        document.getElementById("sheet-overlay").classList.add("open");
+        setTimeout(
+          () => document.getElementById("signup-sheet").classList.add("open"),
+          10,
+        );
+      }
+      function closeSheet() {
+        document.getElementById("signup-sheet").classList.remove("open");
+        setTimeout(
+          () =>
+            document.getElementById("sheet-overlay").classList.remove("open"),
+          350,
+        );
+      }
+      function loginAndGoHome() {
+        closeSheet();
+        go("home");
+        showTabs();
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        document.querySelector(".tab").classList.add("active");
+      }
+
+      function submitPsychProfile() {
+        go("psych-success");
+      }
+
+      // ==================== RENDER ====================
+      function stars(r) {
+        let s = "";
+        for (let i = 0; i < Math.floor(r); i++) s += "★";
+        if (r % 1 >= 0.5) s += "★";
+        return s + " " + r;
+      }
+
+      function renderHome() {
+        document.getElementById("featured-scroll").innerHTML = practitioners
+          .slice(0, 8)
+          .map(
+            (p) => `
+    <div class="featured-card" onclick="openProfile(${p.id})">
+      <div class="fc-header"><div class="avatar" style="width:60px;height:60px;font-size:22px">${p.initials}</div></div>
+      <div class="fc-body"><h4>${p.name}</h4><p>${p.specialty}</p><div class="stars">${stars(p.rating)}</div></div>
+    </div>`,
+          )
+          .join("");
+        document.getElementById("top-rated-list").innerHTML = practitioners
+          .slice(0, 6)
+          .map((p) => pracCard(p))
+          .join("");
+      }
+
+      function pracCard(p) {
+        return `
+  <div class="prac-card" onclick="openProfile(${p.id})">
+    <div class="avatar">${p.initials}</div>
+    <div class="prac-info">
+      <div class="prac-name">${p.name}</div>
+      <div class="prac-specialty">${p.specialty}</div>
+      <div class="prac-meta"><span class="stars">${stars(p.rating)}</span><span>(${p.reviews})</span><span class="prac-price">€${p.price}</span></div>
+      <div class="prac-tags">${p.focus.map((f) => `<span class="prac-tag">${f}</span>`).join("")}</div>
+    </div>
+  </div>`;
+      }
+
+      function renderSearch(filter = "All") {
+        let f = practitioners;
+        if (filter !== "All")
+          f = practitioners.filter(
+            (p) =>
+              p.focus.some((x) =>
+                x.toLowerCase().includes(filter.toLowerCase()),
+              ) ||
+              p.approach.some((a) =>
+                a.toLowerCase().includes(filter.toLowerCase()),
+              ) ||
+              p.specialty.toLowerCase().includes(filter.toLowerCase()),
+          );
+        document.getElementById("search-results").innerHTML =
+          `<div style="font-size:13px;color:var(--tl);margin-bottom:12px">${f.length} psychologists found in Lisbon</div>` +
+          f.map((p) => pracCard(p)).join("");
+      }
+
+      function searchPrac(q) {
+        q = q.toLowerCase();
+        const f = q
+          ? practitioners.filter(
+              (p) =>
+                p.name.toLowerCase().includes(q) ||
+                p.specialty.toLowerCase().includes(q) ||
+                p.focus.some((x) => x.toLowerCase().includes(q)),
+            )
+          : practitioners;
+        document.getElementById("search-results").innerHTML =
+          `<div style="font-size:13px;color:var(--tl);margin-bottom:12px">${f.length} results</div>` +
+          f.map((p) => pracCard(p)).join("");
+      }
+
+      function toggleFilter(el, f) {
+        document
+          .querySelectorAll("#filter-chips .chip")
+          .forEach((c) => c.classList.remove("selected"));
+        el.classList.add("selected");
+        renderSearch(f);
+      }
+
+      function filterBy(cat) {
+        prevScreen = "search";
+        go("search");
+        document.querySelectorAll("#filter-chips .chip").forEach((c) => {
+          c.classList.remove("selected");
+          if (
+            c.textContent.trim() === cat ||
+            (cat === "Relationships" && c.textContent.trim() === "Couples")
+          )
+            c.classList.add("selected");
+        });
+        renderSearch(cat);
+      }
+
+      function openProfile(id) {
+        curPrac = practitioners.find((p) => p.id === id);
+        if (!curPrac) return;
+        const p = curPrac;
+        document.getElementById("p-avatar").textContent = p.initials;
+        document.getElementById("p-name").textContent = p.name;
+        document.getElementById("p-spec").textContent = p.specialty;
+        document.getElementById("p-stars").textContent = stars(p.rating);
+        document.getElementById("p-exp").textContent = p.experience;
+        document.getElementById("p-pat").textContent = p.patients + "+";
+        document.getElementById("p-rev").textContent = p.reviews;
+        document.getElementById("p-bio").textContent = p.bio;
+        document.getElementById("p-tags").innerHTML = p.focus
+          .map((f) => `<span class="chip">${f}</span>`)
+          .join("");
+        document.getElementById("p-approach").innerHTML = p.approach
+          .map((a) => `<li><span class="ai">◆</span>${a}</li>`)
+          .join("");
+        document.getElementById("p-lang").textContent = p.languages;
+        document.getElementById("p-loc").textContent = "📍 " + p.location;
+        document.getElementById("p-price").textContent = "€" + p.price;
+        prevScreen = document.querySelector(".screen.active")?.id || "home";
+        go("profile");
+      }
+
+      function renderPackages() {
+        if (!curPrac) return;
+        const p = curPrac;
+        document.getElementById("pkg-prac").textContent = "with " + p.name;
+        document.getElementById("packages-list").innerHTML = pkgs
+          .map((k, i) => {
+            const price = Math.round(p.price * k.sessions * (1 - k.discount));
+            const per = Math.round(price / k.sessions);
+            return `<div class="package-card ${k.popular ? "popular" : ""} ${i === selPkg ? "selected" : ""}" onclick="selPkg=${i};renderPackages()">
+      <h4>${k.name}</h4><div class="pkg-sessions">${k.sessions} sessions</div>
+      <div class="pkg-price">€${price} <span class="per">€${per}/session</span></div>
+      <ul class="pkg-features">${k.features.map((f) => `<li>${f}</li>`).join("")}</ul>
+    </div>`;
+          })
+          .join("");
+      }
+
+      function renderCheckout() {
+        if (!curPrac) return;
+        const p = curPrac,
+          k = pkgs[selPkg],
+          tot = Math.round(p.price * k.sessions * (1 - k.discount));
+        document.getElementById("co-avatar").textContent = p.initials;
+        document.getElementById("co-name").textContent = p.name;
+        document.getElementById("co-pkg").textContent =
+          k.name + " — " + k.sessions + " sessions";
+        document.getElementById("co-price").textContent = "€" + tot;
+        document.getElementById("co-total").textContent = "€" + tot;
+        document.getElementById("co-pay").textContent = "€" + tot;
+      }
+
+      function completeBooking() {
+        hasBooking = true;
+        document.getElementById("suc-name").textContent = curPrac.name;
+        go("success");
+      }
+
+      function renderBookings() {
+        const el = document.getElementById("bookings-list");
+        if (!hasBooking) {
+          el.innerHTML = `<div class="empty-state"><div class="icon">📅</div><h3>No bookings yet</h3><p>Find your perfect psychologist and book your first session</p><button class="btn btn-primary btn-small" style="margin-top:16px" onclick="go('home')">Find a Psychologist</button></div>`;
+          return;
+        }
+        const p = curPrac,
+          k = pkgs[selPkg],
+          now = new Date(),
+          dates = [];
+        for (let i = 0; i < k.sessions; i++) {
+          const d = new Date(now);
+          d.setDate(d.getDate() + i * 7 + 3);
+          dates.push(
+            d.toLocaleDateString("en-GB", {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          );
+        }
+        el.innerHTML = `<div class="booking-card"><div style="display:flex;gap:12px;align-items:center"><div class="avatar" style="width:44px;height:44px;font-size:16px">${p.initials}</div><div><div style="font-weight:700">${p.name}</div><div style="font-size:13px;color:var(--tl)">${k.name} Package — ${k.sessions} sessions</div></div></div><div class="divider"></div>${dates.map((d, i) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px"><span>Session ${i + 1}</span><span style="color:var(--tl)">${d}</span><span class="badge ${i === 0 ? "badge-accent" : "badge-primary"}">${i === 0 ? "Next" : "Upcoming"}</span></div>`).join("")}</div>`;
+      }
+
+      // ==================== AI CHAT ====================
+      function startChat() {
+        chatStep = 0;
+        document.getElementById("chat-messages").innerHTML = "";
+        document.getElementById("chat-input-bar").style.display = "none";
+        setTimeout(() => addBot(chatFlow[0].bot, chatFlow[0].options), 600);
+      }
+
+      function addBot(text, opts) {
+        const m = document.getElementById("chat-messages");
+        const typ = document.createElement("div");
+        typ.className = "msg msg-typing";
+        typ.innerHTML =
+          '<div class="typing-dots"><span></span><span></span><span></span></div>';
+        m.appendChild(typ);
+        m.scrollTop = m.scrollHeight;
+        setTimeout(() => {
+          typ.remove();
+          const msg = document.createElement("div");
+          msg.className = "msg msg-bot";
+          msg.textContent = text;
+          m.appendChild(msg);
+          if (opts) {
+            const od = document.createElement("div");
+            od.className = "chat-options";
+            opts.forEach((o) => {
+              const b = document.createElement("button");
+              b.className = "chat-option";
+              b.textContent = o;
+              b.onclick = () => pickOpt(o);
+              od.appendChild(b);
+            });
+            m.appendChild(od);
+          }
+          m.scrollTop = m.scrollHeight;
+        }, 1200);
+      }
+
+      function pickOpt(t) {
+        const m = document.getElementById("chat-messages");
+        m.querySelectorAll(".chat-options").forEach((o) => o.remove());
+        const msg = document.createElement("div");
+        msg.className = "msg msg-user";
+        msg.textContent = t;
+        m.appendChild(msg);
+        m.scrollTop = m.scrollHeight;
+        chatStep++;
+        if (chatStep < chatFlow.length)
+          setTimeout(
+            () => addBot(chatFlow[chatStep].bot, chatFlow[chatStep].options),
+            800,
+          );
+        else showMatchResults();
+      }
+
+      function sendChat() {
+        const inp = document.getElementById("chat-input");
+        if (!inp.value.trim()) return;
+        const m = document.getElementById("chat-messages");
+        const msg = document.createElement("div");
+        msg.className = "msg msg-user";
+        msg.textContent = inp.value;
+        m.appendChild(msg);
+        inp.value = "";
+        m.scrollTop = m.scrollHeight;
+      }
+
+      function showMatchResults() {
+        setTimeout(() => {
+          addBot("Analyzing your preferences... 🔍", null);
+          setTimeout(() => {
+            addBot(
+              "I've found your top 3 matches! Let me show you the results.",
+              null,
+            );
+            setTimeout(() => {
+              go("match-results");
+              renderMatchResults();
+            }, 1500);
+          }, 2000);
+        }, 800);
+      }
+
+      function renderMatchResults() {
+        const matches = [
+          {
+            prac: practitioners[0],
+            percent: 96,
+            reason: "Best match for anxiety + CBT preference",
+          },
+          {
+            prac: practitioners[2],
+            percent: 91,
+            reason: "Expert in evidence-based approaches",
+          },
+          {
+            prac: practitioners[3],
+            percent: 87,
+            reason: "Great for first-time therapy seekers",
+          },
+        ];
+        document.getElementById("match-results-list").innerHTML = matches
+          .map(
+            (m) => `
+    <div class="match-result" onclick="openProfile(${m.prac.id})">
+      <div class="match-percent">${m.percent}%</div>
+      <div class="match-info"><h4>${m.prac.name}</h4><p>${m.prac.specialty} · ${m.prac.location}</p><div class="match-reason">${m.reason}</div></div>
+    </div>`,
+          )
+          .join("");
+      }
+
+      // Chip toggle (for psych onboard form)
+      document.addEventListener("click", (e) => {
+        if (e.target.closest(".psych-step .chip-group .chip")) {
+          e.target.classList.toggle("selected");
+        }
+      });
+
+      // ==================== ANIMATED DOT GRID (interactive — JobPilot style) ====================
+      (function () {
+        const canvas = document.getElementById("heroWave");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        let W, H, dpr, cols, rows, raf;
+        const SP = 24;
+        const BASE_R = 1.2;
+        let time = 0;
+        let mouse = { x: -9999, y: -9999, on: false };
+        let bursts = [];
+
+        function init() {
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          W = window.innerWidth;
+          H = window.innerHeight;
+          canvas.width = W * dpr;
+          canvas.height = H * dpr;
+          canvas.style.width = W + "px";
+          canvas.style.height = H + "px";
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          cols = Math.ceil(W / SP) + 2;
+          rows = Math.ceil(H / SP) + 2;
+        }
+
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          time += 0.025;
+
+          for (let i = bursts.length - 1; i >= 0; i--) {
+            bursts[i].life -= 0.015;
+            if (bursts[i].life <= 0) bursts.splice(i, 1);
+          }
+
+          for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+              const bx = col * SP - SP * 0.5;
+              const by = row * SP - SP * 0.5;
+
+              const w1 = Math.sin(bx * 0.02 + time * 0.8) * 7;
+              const w2 = Math.sin(by * 0.025 + time * 0.6) * 6;
+              const w3 = Math.sin((bx + by) * 0.015 + time * 1.1) * 5;
+              const w4 = Math.cos(bx * 0.03 - by * 0.02 + time * 0.5) * 4;
+
+              let ox = w1 * 0.5 + w4 * 0.3;
+              let oy = w2 * 0.5 + w3 * 0.4;
+
+              const bri =
+                Math.sin(bx * 0.018 + time * 0.7) * 0.5 +
+                Math.sin(by * 0.022 + time * 0.9) * 0.3 +
+                Math.sin((bx - by) * 0.012 + time * 1.3) * 0.2;
+              let a = 0.06 + (bri * 0.5 + 0.5) * 0.12;
+              let r = BASE_R + (bri * 0.5 + 0.5) * 0.8;
+
+              // Mouse hover — push dots away
+              if (mouse.on) {
+                const dx = bx + ox - mouse.x;
+                const dy = by + oy - mouse.y;
+                const d = Math.sqrt(dx * dx + dy * dy);
+                if (d < 140) {
+                  const f = 1 - d / 140;
+                  const f2 = f * f;
+                  ox += (dx / (d || 1)) * f2 * 35;
+                  oy += (dy / (d || 1)) * f2 * 35;
+                }
+              }
+
+              // Click bursts — radial push through dots
+              for (let j = 0; j < bursts.length; j++) {
+                const b = bursts[j];
+                const dx = bx - b.x;
+                const dy = by - b.y;
+                const d = Math.sqrt(dx * dx + dy * dy);
+                const reach = b.str * (1 - b.life * 0.4);
+                if (d < reach) {
+                  const f = (1 - d / reach) * b.life;
+                  ox += (dx / (d || 1)) * f * 30;
+                  oy += (dy / (d || 1)) * f * 30;
+                  a += f * 0.2;
+                  r += f * 0.8;
+                }
+              }
+
+              // Purple tint for some dots (MindMatch branding)
+              const purpleness = Math.sin(bx * 0.01 + by * 0.01 + time * 0.3);
+              if (purpleness > 0.3) {
+                ctx.fillStyle =
+                  "rgba(139, 92, 246," + Math.min(a * 1.5, 0.25) + ")";
+              } else {
+                ctx.fillStyle = "rgba(255, 255, 255," + Math.min(a, 0.5) + ")";
+              }
+
+              ctx.beginPath();
+              ctx.arc(bx + ox, by + oy, Math.max(r, 0.5), 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          raf = requestAnimationFrame(draw);
+        }
+
+        document.addEventListener("mousemove", function (e) {
+          mouse.x = e.clientX;
+          mouse.y = e.clientY;
+          mouse.on = true;
+        });
+        document.addEventListener("mouseleave", function () {
+          mouse.on = false;
+          mouse.x = -9999;
+          mouse.y = -9999;
+        });
+        document.addEventListener("click", function (e) {
+          bursts.push({ x: e.clientX, y: e.clientY, str: 200, life: 1 });
+        });
+
+        const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+        if (!mq.matches) {
+          init();
+          draw();
+          window.addEventListener("resize", init);
+        }
+      })();
+
+      // ==================== INIT ====================
+      renderHome();
+      if ("serviceWorker" in navigator)
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+    </script>
+  </body>
+</html>

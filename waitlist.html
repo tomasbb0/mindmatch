@@ -271,8 +271,15 @@
           data.append("ua", navigator.userAgent);
 
           // Primary: append a row to the Google Sheet.
-          // FormData with no custom headers = CORS-simple request, no preflight.
-          var sheetReq = fetch(SHEET_ENDPOINT, { method: "POST", body: data })
+          // We use GET with query params: Apps Script anonymous POSTs return 405
+          // on some Google accounts, but anonymous GETs always work.
+          var qs = new URLSearchParams();
+          data.forEach(function (v, k) {
+            if (k.indexOf("_") !== 0) qs.append(k, v);
+          });
+          var sheetReq = fetch(SHEET_ENDPOINT + "?" + qs.toString(), {
+            method: "GET",
+          })
             .then(function (r) {
               return r.ok;
             })

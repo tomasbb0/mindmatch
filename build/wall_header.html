@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MindMatch — Fit Anxiety Wall</title>
+    <style>
+      @page {
+        size: A3 landscape;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        color: #1a1f36;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .poster {
+        width: 420mm;
+        height: 297mm;
+        padding: 25mm 30mm;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        text-align: center;
+      }
+      .poster::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 12mm;
+        background: linear-gradient(
+          90deg,
+          #2f80ed 0%,
+          #2f80ed 65%,
+          #f9b234 65%,
+          #f9b234 100%
+        );
+      }
+      .brand {
+        font-size: 18pt;
+        color: #2f80ed;
+        font-weight: 800;
+        letter-spacing: 2pt;
+        margin-bottom: 18mm;
+      }
+      .headline {
+        font-size: 70pt;
+        color: #1a1f36;
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -1.2pt;
+        margin-bottom: 10mm;
+      }
+      .headline .accent {
+        color: #2f80ed;
+      }
+      .sub {
+        font-size: 28pt;
+        color: #444;
+        font-weight: 600;
+        margin-bottom: 16mm;
+      }
+      .cta {
+        font-size: 18pt;
+        color: #2f80ed;
+        font-weight: 700;
+        letter-spacing: 0.5pt;
+        margin-top: 6mm;
+      }
+      .cta .pill {
+        display: inline-block;
+        background: #f9b234;
+        color: #1a1f36;
+        padding: 4mm 10mm;
+        border-radius: 50mm;
+        font-size: 16pt;
+        font-weight: 700;
+        margin: 0 3mm;
+      }
+      .foot {
+        position: absolute;
+        bottom: 8mm;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 9pt;
+        color: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="poster">
+      <div class="brand">MINDMATCH</div>
+
+      <div class="headline">
+        Have you ever <span class="accent">NOT started therapy</span><br />
+        because you weren't sure?
+      </div>
+
+      <div class="sub">What stopped you?</div>
+
+      <div class="cta">
+        <span class="pill">Grab a sticky</span>
+        <span class="pill">Write one thing</span>
+        <span class="pill">Stick it below</span>
+      </div>
+
+      <div class="foot">
+        MindMatch · Lisbon · NovaSBE Prototyping Fund Spring 2026
+      </div>
+    </div>
+  </body>
+</html>

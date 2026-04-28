@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MindMatch — Card Sort (8 dimensions)</title>
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 8mm;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        color: #1a1f36;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .page {
+        width: 194mm;
+        height: 281mm;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(4, 1fr);
+        gap: 0;
+        page-break-after: always;
+      }
+      .page:last-child {
+        page-break-after: auto;
+      }
+
+      .card {
+        border: 1px dashed #888;
+        margin: -0.5px;
+        padding: 5mm 5mm 4mm 5mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        background: #fff;
+        page-break-inside: avoid;
+      }
+
+      .card .ribbon {
+        position: absolute;
+        top: 3mm;
+        right: 4mm;
+        font-size: 6.5pt;
+        color: #2f80ed;
+        font-weight: 700;
+        letter-spacing: 0.5pt;
+      }
+      .card .pgtag {
+        position: absolute;
+        top: 3mm;
+        left: 4mm;
+        font-size: 6.5pt;
+        color: #c0c4cc;
+        font-weight: 600;
+      }
+
+      .card .body {
+        text-align: center;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-top: 3mm;
+      }
+      .card .title {
+        font-size: 13pt;
+        font-weight: 700;
+        color: #1a1f36;
+        margin: 2mm 0 2mm 0;
+        line-height: 1.18;
+      }
+      .card .hint {
+        font-size: 8.5pt;
+        color: #555;
+        font-style: italic;
+        line-height: 1.35;
+        padding: 0 1mm;
+      }
+
+      .card .footer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-top: 3mm;
+        gap: 2mm;
+      }
+      .card .priority {
+        font-size: 7.5pt;
+        color: #2f80ed;
+        font-weight: 700;
+        letter-spacing: 0.3pt;
+        display: flex;
+        align-items: center;
+        gap: 1.5mm;
+        flex: 1;
+      }
+      .card .priority .box {
+        display: inline-block;
+        width: 12mm;
+        height: 8mm;
+        border: 1.5px solid #2f80ed;
+        border-radius: 1.5mm;
+        background: #fff;
+      }
+      .card .initials {
+        font-size: 6.5pt;
+        color: #888;
+        text-align: right;
+        flex: 0 0 26mm;
+      }
+      .card .initials .line {
+        display: block;
+        border-bottom: 1px solid #888;
+        height: 4.5mm;
+        margin-top: 0.8mm;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Each <section class="page"> contains 8 identical cards for one dimension -->
+
+    <!-- Page 1: Therapy approach -->
+    <section class="page" id="d1">
+      <!-- 8x card -->
+    </section>
+
+    <!-- Page 2: Goal alignment -->
+    <section class="page" id="d2"></section>
+
+    <!-- Page 3: Directive vs open -->
+    <section class="page" id="d3"></section>
+
+    <!-- Page 4: Empathy & warmth -->
+    <section class="page" id="d4"></section>
+
+    <!-- Page 5: Genuine & authentic -->
+    <section class="page" id="d5"></section>
+
+    <!-- Page 6: Language -->
+    <section class="page" id="d6"></section>
+
+    <!-- Page 7: Cultural background -->
+    <section class="page" id="d7"></section>
+
+    <!-- Page 8: Gender preference -->
+    <section class="page" id="d8"></section>
+
+    <script>
+      const dims = [
+        {
+          tag: "A",
+          title: "Therapy approach",
+          hint: "CBT, psychodynamic, humanistic, EMDR — the method they use",
+        },
+        {
+          tag: "B",
+          title: "Goal alignment",
+          hint: "They focus on what you want to work on, your way",
+        },
+        {
+          tag: "C",
+          title: "How they guide you",
+          hint: "Directive and structured vs. open and exploratory",
+        },
+        {
+          tag: "D",
+          title: "Empathy & warmth",
+          hint: "They genuinely understand how you feel",
+        },
+        {
+          tag: "E",
+          title: "Genuine & authentic",
+          hint: 'No "therapy face" — they show up as a real person',
+        },
+        {
+          tag: "F",
+          title: "Speaks my language",
+          hint: "Native or fluent in your first language",
+        },
+        {
+          tag: "G",
+          title: "Cultural background",
+          hint: "Understands where you come from, what shaped you",
+        },
+        {
+          tag: "H",
+          title: "Gender preference",
+          hint: "You feel safer with a specific gender of therapist",
+        },
+      ];
+
+      const pages = document.querySelectorAll(".page");
+      dims.forEach((d, i) => {
+        const page = pages[i];
+        for (let n = 0; n < 8; n++) {
+          page.insertAdjacentHTML(
+            "beforeend",
+            `
+      <div class="card">
+        <div class="pgtag">${d.tag}</div>
+        <div class="ribbon">MINDMATCH</div>
+        <div class="body">
+          <div class="title">${d.title}</div>
+          <div class="hint">${d.hint}</div>
+        </div>
+        <div class="footer-row">
+          <div class="priority">PRIORITY <span class="box"></span></div>
+          <div class="initials">INITIALS<span class="line"></span></div>
+        </div>
+      </div>
+    `,
+          );
+        }
+      });
+    </script>
+  </body>
+</html>

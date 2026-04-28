@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MindMatch — Join the waitlist</title>
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        color: #1a1f36;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .poster {
+        width: 210mm;
+        height: 297mm;
+        padding: 22mm 18mm;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        position: relative;
+      }
+      .poster::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8mm;
+        background: linear-gradient(
+          90deg,
+          #2f80ed 0%,
+          #2f80ed 60%,
+          #f9b234 60%,
+          #f9b234 100%
+        );
+      }
+
+      .brand {
+        font-size: 18pt;
+        color: #2f80ed;
+        font-weight: 800;
+        letter-spacing: 1pt;
+        text-align: center;
+        margin-bottom: 8mm;
+      }
+      .headline {
+        font-size: 32pt;
+        color: #1a1f36;
+        font-weight: 800;
+        text-align: center;
+        line-height: 1.1;
+        letter-spacing: -0.5pt;
+        margin-bottom: 6mm;
+      }
+      .headline .accent {
+        color: #2f80ed;
+      }
+      .sub {
+        font-size: 14pt;
+        color: #444;
+        text-align: center;
+        line-height: 1.4;
+        margin-bottom: 12mm;
+        max-width: 150mm;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .qr-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+      }
+      .qr-box {
+        border: 6px solid #2f80ed;
+        padding: 8mm;
+        border-radius: 6mm;
+        background: #fff;
+        box-shadow:
+          0 0 0 1mm #fff,
+          0 0 0 1.4mm #f9b234;
+      }
+      .qr-box img {
+        display: block;
+        width: 80mm;
+        height: 80mm;
+      }
+      .qr-cta {
+        margin-top: 8mm;
+        font-size: 18pt;
+        color: #1a1f36;
+        font-weight: 700;
+        text-align: center;
+      }
+      .qr-cta .arrow {
+        color: #2f80ed;
+        font-weight: 800;
+      }
+      .qr-url {
+        margin-top: 3mm;
+        font-size: 11pt;
+        color: #2f80ed;
+        font-weight: 600;
+        font-family: "SF Mono", Menlo, Monaco, monospace;
+        text-align: center;
+        word-break: break-all;
+      }
+
+      .benefits {
+        margin-top: 10mm;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6mm;
+        font-size: 11pt;
+      }
+      .benefit {
+        text-align: center;
+        padding: 5mm;
+        background: #f6f8fc;
+        border-radius: 3mm;
+      }
+      .benefit .ico {
+        font-size: 18pt;
+        font-weight: 800;
+        color: #2f80ed;
+        display: block;
+        margin-bottom: 2mm;
+      }
+      .benefit .label {
+        font-weight: 600;
+        color: #1a1f36;
+      }
+
+      .foot {
+        margin-top: 10mm;
+        text-align: center;
+        font-size: 9pt;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="poster">
+      <div class="brand">MINDMATCH</div>
+
+      <div class="headline">
+        Find a therapist<br />
+        you'll actually <span class="accent">click with.</span>
+      </div>
+
+      <div class="sub">
+        AI-matched on what the science says actually works.<br />
+        Launching in Lisbon. <strong>Join the early access list →</strong>
+      </div>
+
+      <div class="qr-wrap">
+        <div class="qr-box">
+          <img src="qr.png" alt="QR code" />
+        </div>
+        <div class="qr-cta">
+          SCAN <span class="arrow">→</span> JOIN THE WAITLIST
+        </div>
+        <div class="qr-url">Opens your mail app when you scan</div>
+      </div>
+
+      <div class="benefits">
+        <div class="benefit">
+          <span class="ico">20%</span
+          ><span class="label">Launch discount for early access members</span>
+        </div>
+        <div class="benefit">
+          <span class="ico">3</span
+          ><span class="label"
+            >Free swap if it's not the right fit in 3 sessions</span
+          >
+        </div>
+        <div class="benefit">
+          <span class="ico">90s</span
+          ><span class="label"
+            >From 5 quick questions to your top 3 matches</span
+          >
+        </div>
+      </div>
+
+      <div class="foot">
+        MindMatch · Lisbon · NovaSBE Prototyping Fund Spring 2026 · mindmatch.pt
+        (coming soon)
+      </div>
+    </div>
+  </body>
+</html>
