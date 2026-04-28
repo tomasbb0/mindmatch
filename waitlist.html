@@ -1,204 +1,309 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MindMatch — Join the waitlist</title>
-<meta name="description" content="Join the MindMatch early-access waitlist. Launching in Lisbon.">
-<link rel="manifest" href="prototype/manifest.json">
-<style>
-  :root {
-    --ink: #1a1f36;
-    --muted: #5a6378;
-    --accent: #6c5ce7;
-    --bg: #f5f3ff;
-    --card: #ffffff;
-    --border: #e6e3f5;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: linear-gradient(160deg, #f5f3ff 0%, #ede7ff 100%);
-    color: var(--ink);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    -webkit-font-smoothing: antialiased;
-  }
-  .card {
-    width: 100%;
-    max-width: 440px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px 28px;
-    box-shadow: 0 18px 40px -20px rgba(108, 92, 231, 0.35);
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 16px;
-  }
-  .dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 4px rgba(108,92,231,0.18);
-  }
-  h1 {
-    font-size: 26px;
-    line-height: 1.2;
-    margin: 0 0 10px;
-    letter-spacing: -0.3px;
-  }
-  p.lead {
-    margin: 0 0 24px;
-    color: var(--muted);
-    font-size: 15px;
-    line-height: 1.5;
-  }
-  label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    margin: 14px 0 6px;
-  }
-  input, textarea {
-    width: 100%;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-size: 16px;
-    font-family: inherit;
-    color: var(--ink);
-    background: #fafaff;
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  input:focus, textarea:focus {
-    border-color: var(--accent);
-    background: #fff;
-  }
-  textarea { resize: vertical; min-height: 70px; }
-  button {
-    margin-top: 22px;
-    width: 100%;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.05s, background 0.15s;
-  }
-  button:hover { background: #5a4cd1; }
-  button:active { transform: translateY(1px); }
-  .foot {
-    margin-top: 22px;
-    font-size: 12px;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.5;
-  }
-  .foot a { color: var(--accent); text-decoration: none; }
-  .success {
-    display: none;
-    text-align: center;
-    padding: 20px 0 4px;
-  }
-  .success .check {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: #2ecc71;
-    color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 30px; font-weight: 700;
-    margin: 0 auto 14px;
-  }
-  body.sent .form { display: none; }
-  body.sent .success { display: block; }
-</style>
-</head>
-<body>
-  <main class="card">
-    <div class="brand"><span class="dot"></span> MindMatch</div>
-
-    <div class="form">
-      <h1>Join the early-access waitlist</h1>
-      <p class="lead">Launching in Lisbon. Drop your email and we’ll let you know the moment we open the doors.</p>
-
-      <form id="waitlist-form"
-            action="https://formsubmit.co/ajax/tomasmbatalha@gmail.com"
-            method="POST">
-        <input type="hidden" name="_subject" value="MindMatch waitlist signup">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_captcha" value="false">
-        <input type="text" name="_honey" style="display:none">
-
-        <label for="email">Email</label>
-        <input id="email" type="email" name="email" required autocomplete="email" placeholder="you@example.com">
-
-        <label for="name">Name <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional)</span></label>
-        <input id="name" type="text" name="name" autocomplete="name" placeholder="Your name">
-
-        <label for="note">What brought you here? <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional)</span></label>
-        <textarea id="note" name="note" placeholder="Saw your booth at NovaSBE…"></textarea>
-
-        <button type="submit" id="submit-btn">Get early access →</button>
-      </form>
-
-      <div class="foot">
-        We’ll only email you about MindMatch launch. Unsubscribe anytime.
-      </div>
-    </div>
-
-    <div class="success">
-      <div class="check">✓</div>
-      <h1>You’re on the list 🎉</h1>
-      <p class="lead">Thanks — we’ll be in touch as we open up access in Lisbon.</p>
-    </div>
-  </main>
-
-<script>
-(function () {
-  var form = document.getElementById('waitlist-form');
-  var btn = document.getElementById('submit-btn');
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    btn.disabled = true;
-    btn.textContent = 'Sending…';
-    var data = new FormData(form);
-    fetch(form.action, {
-      method: 'POST',
-      body: data,
-      headers: { 'Accept': 'application/json' }
-    }).then(function (r) {
-      if (r.ok) {
-        document.body.classList.add('sent');
-      } else {
-        btn.disabled = false;
-        btn.textContent = 'Try again';
-        alert('Something went wrong — please try again or email tomasmbatalha@gmail.com');
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>MindMatch — Join the waitlist</title>
+    <meta
+      name="description"
+      content="Join the MindMatch early-access waitlist. Launching in Lisbon."
+    />
+    <link rel="manifest" href="prototype/manifest.json" />
+    <style>
+      :root {
+        --ink: #1a1f36;
+        --muted: #5a6378;
+        --accent: #6c5ce7;
+        --bg: #f5f3ff;
+        --card: #ffffff;
+        --border: #e6e3f5;
       }
-    }).catch(function () {
-      btn.disabled = false;
-      btn.textContent = 'Try again';
-      alert('Network error — please try again');
-    });
-  });
-})();
-</script>
-</body>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(160deg, #f5f3ff 0%, #ede7ff 100%);
+        color: var(--ink);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+        -webkit-font-smoothing: antialiased;
+      }
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 32px 28px;
+        box-shadow: 0 18px 40px -20px rgba(108, 92, 231, 0.35);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 16px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.18);
+      }
+      h1 {
+        font-size: 26px;
+        line-height: 1.2;
+        margin: 0 0 10px;
+        letter-spacing: -0.3px;
+      }
+      p.lead {
+        margin: 0 0 24px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+        margin: 14px 0 6px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 16px;
+        font-family: inherit;
+        color: var(--ink);
+        background: #fafaff;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      input:focus,
+      textarea:focus {
+        border-color: var(--accent);
+        background: #fff;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 70px;
+      }
+      button {
+        margin-top: 22px;
+        width: 100%;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.05s,
+          background 0.15s;
+      }
+      button:hover {
+        background: #5a4cd1;
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      .foot {
+        margin-top: 22px;
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+        line-height: 1.5;
+      }
+      .foot a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .success {
+        display: none;
+        text-align: center;
+        padding: 20px 0 4px;
+      }
+      .success .check {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #2ecc71;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        font-weight: 700;
+        margin: 0 auto 14px;
+      }
+      body.sent .form {
+        display: none;
+      }
+      body.sent .success {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="brand"><span class="dot"></span> MindMatch</div>
+
+      <div class="form">
+        <h1>Join the early-access waitlist</h1>
+        <p class="lead">
+          Launching in Lisbon. Drop your email and we’ll let you know the moment
+          we open the doors.
+        </p>
+
+        <form id="waitlist-form" method="POST">
+          <input type="text" name="_honey" style="display: none" />
+
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            required
+            autocomplete="email"
+            placeholder="you@example.com"
+          />
+
+          <label for="name"
+            >Name
+            <span
+              style="
+                font-weight: 400;
+                text-transform: none;
+                color: var(--muted);
+              "
+              >(optional)</span
+            ></label
+          >
+          <input
+            id="name"
+            type="text"
+            name="name"
+            autocomplete="name"
+            placeholder="Your name"
+          />
+
+          <label for="note"
+            >What brought you here?
+            <span
+              style="
+                font-weight: 400;
+                text-transform: none;
+                color: var(--muted);
+              "
+              >(optional)</span
+            ></label
+          >
+          <textarea
+            id="note"
+            name="note"
+            placeholder="Saw your booth at NovaSBE…"
+          ></textarea>
+
+          <button type="submit" id="submit-btn">Get early access →</button>
+        </form>
+
+        <div class="foot">
+          We’ll only email you about MindMatch launch. Unsubscribe anytime.
+        </div>
+      </div>
+
+      <div class="success">
+        <div class="check">✓</div>
+        <h1>You’re on the list 🎉</h1>
+        <p class="lead">
+          Thanks — we’ll be in touch as we open up access in Lisbon.
+        </p>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        // Google Apps Script Web App that appends a row to the waitlist Sheet.
+        var SHEET_ENDPOINT =
+          "https://script.google.com/macros/s/AKfycbyegbD5Ew0rJEulZxoFZTcxPAGeiXAPacRlYI1DFUFpS3NF_qh7jgqhkJzK8yV_i1srhg/exec";
+        // Optional Gmail mirror via Formsubmit (works after one-time activation email).
+        var EMAIL_ENDPOINT =
+          "https://formsubmit.co/ajax/tomasmbatalha@gmail.com";
+
+        var form = document.getElementById("waitlist-form");
+        var btn = document.getElementById("submit-btn");
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          if (form._honey && form._honey.value) return; // honeypot
+          btn.disabled = true;
+          btn.textContent = "Sending…";
+
+          var data = new FormData(form);
+          data.append("ua", navigator.userAgent);
+
+          // Primary: append a row to the Google Sheet.
+          // FormData with no custom headers = CORS-simple request, no preflight.
+          var sheetReq = fetch(SHEET_ENDPOINT, { method: "POST", body: data })
+            .then(function (r) {
+              return r.ok;
+            })
+            .catch(function () {
+              return false;
+            });
+
+          // Mirror: also email a copy via Formsubmit (fire-and-forget).
+          var emailData = new FormData(form);
+          emailData.append("_subject", "MindMatch waitlist signup");
+          emailData.append("_template", "table");
+          emailData.append("_captcha", "false");
+          fetch(EMAIL_ENDPOINT, {
+            method: "POST",
+            body: emailData,
+            headers: { Accept: "application/json" },
+          }).catch(function () {});
+
+          sheetReq.then(function (ok) {
+            if (ok) {
+              document.body.classList.add("sent");
+            } else {
+              btn.disabled = false;
+              btn.textContent = "Try again";
+              alert(
+                "Something went wrong — please try again or email tomasmbatalha@gmail.com",
+              );
+            }
+          });
+        });
+      })();
+    </script>
+  </body>
 </html>
